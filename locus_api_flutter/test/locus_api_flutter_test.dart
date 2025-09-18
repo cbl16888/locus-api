@@ -1,0 +1,99 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:locus_api_flutter/locus_api_flutter.dart';
+import 'package:locus_api_flutter/locus_api_flutter_platform_interface.dart';
+import 'package:locus_api_flutter/locus_api_flutter_method_channel.dart';
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+
+class MockLocusApiFlutterPlatform
+    with MockPlatformInterfaceMixin
+    implements LocusApiFlutterPlatform {
+
+  @override
+  Future<String?> getPlatformVersion() => Future.value('42');
+
+  @override
+  Future<Map<String, dynamic>?> getLocusInfo() => Future.value({
+    'isRunning': true,
+    'versionName': '4.0.0',
+    'versionCode': 400,
+    'isPeriodicUpdatesEnabled': false,
+    'isTrackRecording': false,
+  });
+
+  @override
+  Future<void> displayPoint(LocusPoint point) => Future.value();
+
+  @override
+  Future<void> displayPoints(List<LocusPoint> points) => Future.value();
+
+  @override
+  Future<void> startNavigation(LocusPoint point) => Future.value();
+
+  @override
+  Future<void> startTrackRecording({String? profileName}) => Future.value();
+
+  @override
+  Future<void> stopTrackRecording({bool autoSave = true}) => Future.value();
+
+  @override
+  Future<void> pauseTrackRecording() => Future.value();
+
+  @override
+  Future<void> resumeTrackRecording() => Future.value();
+
+  @override
+  Future<bool> isLocusMapInstalled() => Future.value(true);
+
+  @override
+  Future<bool> isTrackRecording() => Future.value(false);
+}
+
+void main() {
+  final LocusApiFlutterPlatform initialPlatform = LocusApiFlutterPlatform.instance;
+
+  test('$MethodChannelLocusApiFlutter is the default instance', () {
+    expect(initialPlatform, isInstanceOf<MethodChannelLocusApiFlutter>());
+  });
+
+  test('getPlatformVersion', () async {
+    LocusApiFlutter locusApiFlutterPlugin = LocusApiFlutter();
+    MockLocusApiFlutterPlatform fakePlatform = MockLocusApiFlutterPlatform();
+    LocusApiFlutterPlatform.instance = fakePlatform;
+
+    expect(await locusApiFlutterPlugin.getPlatformVersion(), '42');
+  });
+
+  test('getLocusInfo', () async {
+    LocusApiFlutter locusApiFlutterPlugin = LocusApiFlutter();
+    MockLocusApiFlutterPlatform fakePlatform = MockLocusApiFlutterPlatform();
+    LocusApiFlutterPlatform.instance = fakePlatform;
+
+    final info = await locusApiFlutterPlugin.getLocusInfo();
+    expect(info, isNotNull);
+    expect(info!['isRunning'], true);
+    expect(info['versionName'], '4.0.0');
+  });
+
+  test('isLocusMapInstalled', () async {
+    LocusApiFlutter locusApiFlutterPlugin = LocusApiFlutter();
+    MockLocusApiFlutterPlatform fakePlatform = MockLocusApiFlutterPlatform();
+    LocusApiFlutterPlatform.instance = fakePlatform;
+
+    expect(await locusApiFlutterPlugin.isLocusMapInstalled(), true);
+  });
+
+  test('displayPoint', () async {
+    LocusApiFlutter locusApiFlutterPlugin = LocusApiFlutter();
+    MockLocusApiFlutterPlatform fakePlatform = MockLocusApiFlutterPlatform();
+    LocusApiFlutterPlatform.instance = fakePlatform;
+
+    final point = LocusPoint(
+      name: 'Test Point',
+      latitude: 50.0755,
+      longitude: 14.4378,
+    );
+
+    // Should not throw
+    await locusApiFlutterPlugin.displayPoint(point);
+  });
+}

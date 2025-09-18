@@ -1,0 +1,16 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  package="com.asamm.locus_api_flutter">
+  
+  <!-- Permissions required for Locus API -->
+  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+  <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+  
+  <!-- Queries for Locus Map packages -->
+  <queries>
+    <package android:name="menion.android.locus" />
+    <package android:name="menion.android.locus.pro" />
+    <package android:name="menion.android.locus.free" />
+  </queries>
+</manifest>

@@ -250,9 +250,15 @@ class _MyHomePageState extends State<MyHomePage> {
     
     // 初始化轨迹数据
     for (var point in points) {
-      _vehicleTrajectories[point.name] = [];
+      _vehicleTrajectories[point.name] = [
+        LocusTrackPoint(
+          latitude: point.latitude,
+          longitude: point.longitude,
+          timestamp: DateTime.now().millisecondsSinceEpoch,
+        )
+      ];
     }
-    
+
     _timer?.cancel();
     _timer = Timer.periodic(Duration(seconds: 5), (timer) {
 
@@ -297,16 +303,15 @@ class _MyHomePageState extends State<MyHomePage> {
       for (var vehicleName in _vehicleTrajectories.keys) {
         var trajectoryPoints = _vehicleTrajectories[vehicleName] ?? [];
         
-        if (trajectoryPoints.length >= 2) {
+        if (trajectoryPoints.isNotEmpty) {
           // 创建轨迹对象
           var track = LocusTrack(
             name: '${vehicleName}_轨迹',
-            points: trajectoryPoints,
+            points: trajectoryPoints.length == 1 ? [trajectoryPoints[0], trajectoryPoints[0]] : trajectoryPoints,
             description: '$vehicleName 的移动轨迹',
             color: _getVehicleColor(vehicleName), // 为不同车辆设置不同颜色
             width: 1.0, // 增加轨迹线宽度到5像素，更容易看到
           );
-          
           tracks.add(track);
         }
       }

@@ -7,10 +7,10 @@ class LocusPoint {
   final String name;
   
   /// Latitude coordinate
-  final double latitude;
+  late double latitude;
   
   /// Longitude coordinate
-  final double longitude;
+  late double longitude;
   
   /// Altitude in meters (optional)
   final double? altitude;
@@ -24,7 +24,7 @@ class LocusPoint {
   /// Additional parameters
   final Map<String, dynamic>? extraData;
 
-  const LocusPoint({
+  LocusPoint({
     this.id,
     required this.name,
     required this.latitude,

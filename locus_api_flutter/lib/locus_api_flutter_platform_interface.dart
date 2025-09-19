@@ -2,8 +2,6 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'locus_api_flutter_method_channel.dart';
 import 'src/models/locus_point.dart';
-import 'src/models/locus_track.dart';
-import 'src/models/locus_info.dart';
 
 abstract class LocusApiFlutterPlatform extends PlatformInterface {
   /// Constructs a LocusApiFlutterPlatform.
@@ -39,6 +37,26 @@ abstract class LocusApiFlutterPlatform extends PlatformInterface {
   /// Display multiple points in Locus Map
   Future<void> displayPoints(List<LocusPoint> points) {
     throw UnimplementedError('displayPoints() has not been implemented.');
+  }
+
+  /// Update a single point in Locus Map (for real-time updates)
+  Future<void> updatePoint(LocusPoint point) {
+    throw UnimplementedError('updatePoint() has not been implemented.');
+  }
+
+  /// Update multiple points in Locus Map (for real-time updates)
+  Future<void> updatePoints(List<LocusPoint> points) {
+    throw UnimplementedError('updatePoints() has not been implemented.');
+  }
+
+  /// Clear all points from Locus Map
+  Future<void> clearPoints() {
+    throw UnimplementedError('clearPoints() has not been implemented.');
+  }
+
+  /// Clear points with specific pack name from Locus Map
+  Future<void> clearPointsWithName(String packName) {
+    throw UnimplementedError('clearPointsWithName() has not been implemented.');
   }
 
   /// Start navigation to a specific point

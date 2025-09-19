@@ -3,8 +3,6 @@ import 'package:flutter/services.dart';
 
 import 'locus_api_flutter_platform_interface.dart';
 import 'src/models/locus_point.dart';
-import 'src/models/locus_track.dart';
-import 'src/models/locus_info.dart';
 
 /// An implementation of [LocusApiFlutterPlatform] that uses method channels.
 class MethodChannelLocusApiFlutter extends LocusApiFlutterPlatform {
@@ -54,17 +52,42 @@ class MethodChannelLocusApiFlutter extends LocusApiFlutterPlatform {
   }
 
   @override
-  Future<void> startTrackRecording({String? profileName}) async {
-    await methodChannel.invokeMethod('startTrackRecording', {
-      'profileName': profileName,
+  Future<void> updatePoint(LocusPoint point) async {
+    await methodChannel.invokeMethod('updatePoint', {
+      'name': point.name,
+      'latitude': point.latitude,
+      'longitude': point.longitude,
+      'description': point.description,
     });
   }
 
   @override
-  Future<void> stopTrackRecording({bool autoSave = true}) async {
-    await methodChannel.invokeMethod('stopTrackRecording', {
-      'autoSave': autoSave,
+  Future<void> updatePoints(List<LocusPoint> points) async {
+    await methodChannel.invokeMethod('updatePoints', {
+      'points': points.map((p) => p.toMap()).toList(),
     });
+  }
+
+  @override
+  Future<void> clearPoints() async {
+    await methodChannel.invokeMethod('clearPoints');
+  }
+
+  @override
+  Future<void> clearPointsWithName(String packName) async {
+    await methodChannel.invokeMethod('clearPointsWithName', {
+      'packName': packName,
+    });
+  }
+
+  @override
+  Future<void> startTrackRecording({String? profileName}) async {
+    await methodChannel.invokeMethod('startTrackRecording');
+  }
+
+  @override
+  Future<void> stopTrackRecording({bool autoSave = true}) async {
+    await methodChannel.invokeMethod('stopTrackRecording');
   }
 
   @override

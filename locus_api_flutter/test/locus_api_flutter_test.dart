@@ -27,6 +27,18 @@ class MockLocusApiFlutterPlatform
   Future<void> displayPoints(List<LocusPoint> points) => Future.value();
 
   @override
+  Future<void> updatePoint(LocusPoint point) => Future.value();
+
+  @override
+  Future<void> updatePoints(List<LocusPoint> points) => Future.value();
+
+  @override
+  Future<void> clearPoints() => Future.value();
+
+  @override
+  Future<void> clearPointsWithName(String packName) => Future.value();
+
+  @override
   Future<void> startNavigation(LocusPoint point) => Future.value();
 
   @override

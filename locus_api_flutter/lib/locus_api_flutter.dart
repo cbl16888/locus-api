@@ -1,5 +1,3 @@
-library locus_api_flutter;
-
 export 'src/models/locus_point.dart';
 export 'src/models/locus_track.dart';
 export 'src/models/locus_info.dart';
@@ -23,6 +21,26 @@ class LocusApiFlutter {
   /// Display multiple points in Locus Map
   Future<void> displayPoints(List<LocusPoint> points) {
     return LocusApiFlutterPlatform.instance.displayPoints(points);
+  }
+
+  /// Update a single point in Locus Map (for real-time updates)
+  Future<void> updatePoint(LocusPoint point) {
+    return LocusApiFlutterPlatform.instance.updatePoint(point);
+  }
+
+  /// Update multiple points in Locus Map (for real-time updates)
+  Future<void> updatePoints(List<LocusPoint> points) {
+    return LocusApiFlutterPlatform.instance.updatePoints(points);
+  }
+
+  /// Clear all points from Locus Map
+  Future<void> clearPoints() {
+    return LocusApiFlutterPlatform.instance.clearPoints();
+  }
+
+  /// Clear points with specific pack name from Locus Map
+  Future<void> clearPointsWithName(String packName) {
+    return LocusApiFlutterPlatform.instance.clearPointsWithName(packName);
   }
 
   /// Start navigation to a specific point

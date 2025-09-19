@@ -35,6 +35,8 @@ class _MyHomePageState extends State<MyHomePage> {
   String _status = 'Unknown';
   bool _isLocusInstalled = false;
   bool _isTrackRecording = false;
+  bool _testPointDisplayed = false;
+  bool _testPointsDisplayed = false;
   Timer? _timer;
 
   @override
@@ -65,29 +67,44 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> _displayTestPoint() async {
     try {
-      final point = LocusPoint(
-        name: 'Test Point',
-        latitude: 24.485408,
-        longitude: 118.164626,
-        description: 'This is a test point from Flutter plugin',
-      );
-
-
-      //   {"lon": 118.164626, "lat": 24.485408, "name": "user00"},
-      //   {"lon": 118.175725, "lat": 24.485408, "name": "user01"},
-      //   {"lon": 118.186824, "lat": 24.485408, "name": "user02"}
-
-      await _locusApiFlutterPlugin.displayPoint(point);
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Point sent to Locus Map')),
+      if (_testPointDisplayed) {
+        // 删除测试点位
+        await _locusApiFlutterPlugin.clearPointsWithName('Test Point');
+        
+        setState(() {
+          _testPointDisplayed = false;
+        });
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('测试点位已删除')),
+          );
+        }
+      } else {
+        // 显示测试点位
+        final point = LocusPoint(
+          name: 'Test Point',
+          latitude: 24.485408,
+          longitude: 118.164626,
+          description: 'This is a test point from Flutter plugin',
         );
+
+        await _locusApiFlutterPlugin.displayPoint(point);
+        
+        setState(() {
+          _testPointDisplayed = true;
+        });
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('测试点位已显示')),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text('操作失败: $e')),
         );
       }
     }
@@ -95,43 +112,58 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> _displayTestPoints() async {
     try {
-      final points = [
-        LocusPoint(
-          name: 'Test Point 00',
-          latitude: 24.485408,
-          longitude: 118.164626,
-          description: 'This is a test point from Flutter plugin',
-        ),
-        LocusPoint(
-          name: 'Test Point 01',
-          latitude: 24.485408,
-          longitude: 118.175725,
-          description: 'This is a test point from Flutter plugin',
-        ),
-        LocusPoint(
-          name: 'Test Point 02',
-          latitude: 24.485408,
-          longitude: 118.186824,
-          description: 'This is a test point from Flutter plugin',
-        )
-      ];
+      if (_testPointsDisplayed) {
+        // 删除多个测试点位
+        await _locusApiFlutterPlugin.clearPointsWithName('Multiple Points');
+        
+        setState(() {
+          _testPointsDisplayed = false;
+        });
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('多个测试点位已删除')),
+          );
+        }
+      } else {
+        // 显示多个测试点位
+        final points = [
+          LocusPoint(
+            name: 'Test Point 00',
+            latitude: 24.485408,
+            longitude: 118.164626,
+            description: 'This is a test point from Flutter plugin',
+          ),
+          LocusPoint(
+            name: 'Test Point 01',
+            latitude: 24.485408,
+            longitude: 118.175725,
+            description: 'This is a test point from Flutter plugin',
+          ),
+          LocusPoint(
+            name: 'Test Point 02',
+            latitude: 24.485408,
+            longitude: 118.186824,
+            description: 'This is a test point from Flutter plugin',
+          )
+        ];
 
+        await _locusApiFlutterPlugin.displayPoints(points);
+        
+        setState(() {
+          _testPointsDisplayed = true;
+        });
 
-      //   {"lon": 118.164626, "lat": 24.485408, "name": "user00"},
-      //   {"lon": 118.175725, "lat": 24.485408, "name": "user01"},
-      //   {"lon": 118.186824, "lat": 24.485408, "name": "user02"}
-
-      await _locusApiFlutterPlugin.displayPoints(points);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Points sent to Locus Map')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('多个测试点位已显示')),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text('操作失败: $e')),
         );
       }
     }
@@ -236,6 +268,12 @@ class _MyHomePageState extends State<MyHomePage> {
       _timer?.cancel();
       await _locusApiFlutterPlugin.clearPoints();
       
+      // 重置所有状态
+      setState(() {
+        _testPointDisplayed = false;
+        _testPointsDisplayed = false;
+      });
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('所有点位已清除')),
@@ -288,12 +326,12 @@ class _MyHomePageState extends State<MyHomePage> {
             const SizedBox(height: 8),
             ElevatedButton(
               onPressed: _isLocusInstalled ? _displayTestPoint : null,
-              child: const Text('Display Test Point'),
+              child: Text(_testPointDisplayed ? '删除测试点位' : '显示测试点位'),
             ),
             const SizedBox(height: 8),
             ElevatedButton(
               onPressed: _isLocusInstalled ? _displayTestPoints : null,
-              child: const Text('Display Test Points'),
+              child: Text(_testPointsDisplayed ? '删除多个测试点位' : '显示多个测试点位'),
             ),
             const SizedBox(height: 8),
             ElevatedButton(

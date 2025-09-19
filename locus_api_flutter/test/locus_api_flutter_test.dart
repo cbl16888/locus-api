@@ -58,6 +58,24 @@ class MockLocusApiFlutterPlatform
 
   @override
   Future<bool> isTrackRecording() => Future.value(false);
+
+  @override
+  Future<void> displayTrack(LocusTrack track) => Future.value();
+
+  @override
+  Future<void> displayTracks(List<LocusTrack> tracks) => Future.value();
+
+  @override
+  Future<void> updateTrack(LocusTrack track) => Future.value();
+
+  @override
+  Future<void> updateTracks(List<LocusTrack> tracks) => Future.value();
+
+  @override
+  Future<void> clearTracks() => Future.value();
+
+  @override
+  Future<void> clearTrackByName(String trackName) => Future.value();
 }
 
 void main() {

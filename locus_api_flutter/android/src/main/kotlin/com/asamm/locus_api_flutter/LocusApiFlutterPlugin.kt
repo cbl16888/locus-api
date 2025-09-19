@@ -13,12 +13,17 @@ import io.flutter.plugin.common.MethodChannel.Result
 
 import locus.api.android.ActionBasics
 import locus.api.android.ActionDisplayPoints
+import locus.api.android.ActionDisplayTracks
 import locus.api.android.ActionDisplayVarious
 import locus.api.android.objects.LocusVersion
 import locus.api.android.objects.PackPoints
 import locus.api.android.utils.LocusUtils
 import locus.api.objects.extra.Location
 import locus.api.objects.geoData.Point
+import locus.api.objects.geoData.Track
+import locus.api.objects.styles.GeoDataStyle
+import android.graphics.Color
+
 
 /** LocusApiFlutterPlugin */
 class LocusApiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
@@ -302,6 +307,139 @@ class LocusApiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           result.success(false)
         }
         
+        "displayTrack" -> {
+          val currentActivity = activity
+          if (currentActivity == null) {
+            result.error("NO_ACTIVITY", "No activity available", null)
+            return
+          }
+          
+          val trackMap = call.argument<Map<String, Any>>("track")
+          if (trackMap == null) {
+            result.error("INVALID_ARGUMENTS", "Track data is required", null)
+            return
+          }
+          
+          try {
+            val track = createTrackFromMap(trackMap)
+            val success = ActionDisplayTracks.sendTrack(currentActivity, track, ActionDisplayVarious.ExtraAction.NONE)
+            result.success(success)
+          } catch (e: Exception) {
+            result.error("LOCUS_API_ERROR", e.message, null)
+          }
+        }
+        
+        "displayTracks" -> {
+          val currentActivity = activity
+          if (currentActivity == null) {
+            result.error("NO_ACTIVITY", "No activity available", null)
+            return
+          }
+          
+          val tracksList = call.argument<List<Map<String, Any>>>("tracks") ?: emptyList()
+          if (tracksList.isEmpty()) {
+            result.success(true)
+            return
+          }
+          
+          try {
+            val tracks = tracksList.map { createTrackFromMap(it) }
+            val success = ActionDisplayTracks.sendTracks(currentActivity, tracks, ActionDisplayVarious.ExtraAction.NONE)
+            result.success(success)
+          } catch (e: Exception) {
+            result.error("LOCUS_API_ERROR", e.message, null)
+          }
+        }
+        
+        "updateTrack" -> {
+          val currentActivity = activity
+          if (currentActivity == null) {
+            result.error("NO_ACTIVITY", "No activity available", null)
+            return
+          }
+          
+          val trackMap = call.argument<Map<String, Any>>("track")
+          if (trackMap == null) {
+            result.error("INVALID_ARGUMENTS", "Track data is required", null)
+            return
+          }
+          
+          try {
+            val track = createTrackFromMap(trackMap)
+            val success = ActionDisplayTracks.sendTrackSilent(currentActivity, track, false)
+            result.success(success)
+          } catch (e: Exception) {
+            result.error("LOCUS_API_ERROR", e.message, null)
+          }
+        }
+        
+        "updateTracks" -> {
+          val currentActivity = activity
+          if (currentActivity == null) {
+            result.error("NO_ACTIVITY", "No activity available", null)
+            return
+          }
+          
+          val tracksList = call.argument<List<Map<String, Any>>>("tracks") ?: emptyList()
+          if (tracksList.isEmpty()) {
+            result.success(true)
+            return
+          }
+          
+          try {
+            val tracks = tracksList.map { createTrackFromMap(it) }
+            val success = ActionDisplayTracks.sendTracksSilent(currentActivity, tracks, false)
+            result.success(success)
+          } catch (e: Exception) {
+            result.error("LOCUS_API_ERROR", e.message, null)
+          }
+        }
+        
+        "clearTracks" -> {
+          val currentActivity = activity
+          if (currentActivity == null) {
+            result.error("NO_ACTIVITY", "No activity available", null)
+            return
+          }
+          
+          try {
+            // 根据Locus API文档，要清除轨迹需要发送同名但空内容的轨迹
+            // 我们创建已知轨迹名称的空轨迹来清除它们
+            val emptyTracks = listOf(
+              Track().apply { name = "车辆1_轨迹" },
+              Track().apply { name = "车辆2_轨迹" },
+              Track().apply { name = "车辆3_轨迹" }
+            )
+            val success = ActionDisplayTracks.sendTracksSilent(currentActivity, emptyTracks, false)
+            result.success(success)
+          } catch (e: Exception) {
+            result.error("LOCUS_API_ERROR", e.message, null)
+          }
+        }
+        
+        "clearTrackByName" -> {
+          val currentActivity = activity
+          if (currentActivity == null) {
+            result.error("NO_ACTIVITY", "No activity available", null)
+            return
+          }
+          
+          val trackName = call.argument<String>("trackName") ?: ""
+          if (trackName.isEmpty()) {
+            result.error("INVALID_ARGUMENTS", "Track name is required", null)
+            return
+          }
+          
+          try {
+            // 创建同名但空内容的轨迹来清除指定轨迹
+            val emptyTrack = Track().apply { name = trackName }
+            val success = ActionDisplayTracks.sendTrackSilent(currentActivity, emptyTrack, false)
+            result.success(success)
+          } catch (e: Exception) {
+            result.error("LOCUS_API_ERROR", e.message, null)
+          }
+        }
+        
         "openLocusMap" -> {
           val success = LocusUtils.callStartLocusMap(context)
           result.success(success)
@@ -314,6 +452,66 @@ class LocusApiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     } catch (e: Exception) {
       result.error("LOCUS_API_ERROR", e.message, null)
     }
+  }
+
+  private fun createTrackFromMap(trackMap: Map<String, Any>): Track {
+    val name = trackMap["name"] as? String ?: ""
+    val pointsList = trackMap["points"] as? List<Map<String, Any>> ?: emptyList()
+    val colorHex = trackMap["color"] as? String
+    val width = trackMap["width"] as? Double
+    
+    val track = Track()
+    track.name = name
+    
+    // 设置轨迹样式
+    if (colorHex != null || width != null) {
+      val style = GeoDataStyle()
+      
+      // 解析颜色和宽度
+      var color = Color.RED // 默认红色
+      var lineWidth = 5.0f // 默认线宽
+      
+      if (colorHex != null && colorHex.isNotEmpty()) {
+        try {
+          color = Color.parseColor(colorHex)
+        } catch (e: Exception) {
+          // 如果颜色解析失败，使用默认红色
+          color = Color.RED
+        }
+      }
+      
+      if (width != null && width > 0) {
+        lineWidth = width.toFloat()
+      }
+      
+      // 使用正确的 Locus API 方法设置线条样式
+      style.setLineStyle(color, lineWidth)
+      track.styleNormal = style
+    }
+    
+    // 添加轨迹点到Track的points列表
+    for (pointMap in pointsList) {
+      val latitude = pointMap["latitude"] as? Double ?: 0.0
+      val longitude = pointMap["longitude"] as? Double ?: 0.0
+      val altitude = pointMap["altitude"] as? Double
+      val timestamp = pointMap["timestamp"] as? Long
+      val speed = pointMap["speed"] as? Double
+      
+      val location = Location(latitude, longitude)
+      if (altitude != null) {
+        location.altitude = altitude
+      }
+      if (timestamp != null) {
+        location.time = timestamp
+      }
+      if (speed != null) {
+        location.speed = speed.toFloat()
+      }
+      
+      track.points.add(location)
+    }
+    
+    return track
   }
 
   override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {

@@ -4,6 +4,7 @@ export 'src/models/locus_info.dart';
 
 import 'locus_api_flutter_platform_interface.dart';
 import 'src/models/locus_point.dart';
+import 'src/models/locus_track.dart';
 
 /// Main class for interacting with Locus Map application
 class LocusApiFlutter {
@@ -48,6 +49,26 @@ class LocusApiFlutter {
     return LocusApiFlutterPlatform.instance.startNavigation(point);
   }
 
+  /// Display a single track in Locus Map
+  Future<void> displayTrack(LocusTrack track) {
+    return LocusApiFlutterPlatform.instance.displayTrack(track);
+  }
+
+  /// Display multiple tracks in Locus Map
+  Future<void> displayTracks(List<LocusTrack> tracks) {
+    return LocusApiFlutterPlatform.instance.displayTracks(tracks);
+  }
+
+  /// Update a single track in Locus Map (for real-time updates)
+  Future<void> updateTrack(LocusTrack track) {
+    return LocusApiFlutterPlatform.instance.updateTrack(track);
+  }
+
+  /// Update multiple tracks in Locus Map (for real-time updates)
+  Future<void> updateTracks(List<LocusTrack> tracks) {
+    return LocusApiFlutterPlatform.instance.updateTracks(tracks);
+  }
+
   /// Start track recording
   Future<void> startTrackRecording({String? profileName}) {
     return LocusApiFlutterPlatform.instance.startTrackRecording(profileName: profileName);
@@ -81,5 +102,15 @@ class LocusApiFlutter {
   /// Get platform version (for debugging)
   Future<String?> getPlatformVersion() {
     return LocusApiFlutterPlatform.instance.getPlatformVersion();
+  }
+
+  /// Clear all tracks from Locus Map
+  Future<void> clearTracks() {
+    return LocusApiFlutterPlatform.instance.clearTracks();
+  }
+
+  /// Clear specific track by name from Locus Map
+  Future<void> clearTrackByName(String trackName) {
+    return LocusApiFlutterPlatform.instance.clearTrackByName(trackName);
   }
 }

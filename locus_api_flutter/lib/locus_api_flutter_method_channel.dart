@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import 'locus_api_flutter_platform_interface.dart';
 import 'src/models/locus_point.dart';
+import 'src/models/locus_track.dart';
 
 /// An implementation of [LocusApiFlutterPlatform] that uses method channels.
 class MethodChannelLocusApiFlutter extends LocusApiFlutterPlatform {
@@ -110,5 +111,45 @@ class MethodChannelLocusApiFlutter extends LocusApiFlutterPlatform {
   Future<bool> isTrackRecording() async {
     final result = await methodChannel.invokeMethod<bool>('isTrackRecording');
     return result ?? false;
+  }
+
+  @override
+  Future<void> displayTrack(LocusTrack track) async {
+    await methodChannel.invokeMethod('displayTrack', {
+      'track': track.toMap(),
+    });
+  }
+
+  @override
+  Future<void> displayTracks(List<LocusTrack> tracks) async {
+    await methodChannel.invokeMethod('displayTracks', {
+      'tracks': tracks.map((t) => t.toMap()).toList(),
+    });
+  }
+
+  @override
+  Future<void> updateTrack(LocusTrack track) async {
+    await methodChannel.invokeMethod('updateTrack', {
+      'track': track.toMap(),
+    });
+  }
+
+  @override
+  Future<void> updateTracks(List<LocusTrack> tracks) async {
+    await methodChannel.invokeMethod('updateTracks', {
+      'tracks': tracks.map((t) => t.toMap()).toList(),
+    });
+  }
+
+  @override
+  Future<void> clearTracks() async {
+    await methodChannel.invokeMethod('clearTracks');
+  }
+
+  @override
+  Future<void> clearTrackByName(String trackName) async {
+    await methodChannel.invokeMethod('clearTrackByName', {
+      'trackName': trackName,
+    });
   }
 }

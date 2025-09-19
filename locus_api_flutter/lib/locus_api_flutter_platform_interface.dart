@@ -2,6 +2,7 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'locus_api_flutter_method_channel.dart';
 import 'src/models/locus_point.dart';
+import 'src/models/locus_track.dart';
 
 abstract class LocusApiFlutterPlatform extends PlatformInterface {
   /// Constructs a LocusApiFlutterPlatform.
@@ -97,5 +98,35 @@ abstract class LocusApiFlutterPlatform extends PlatformInterface {
   /// Get platform version (for debugging)
   Future<String?> getPlatformVersion() {
     throw UnimplementedError('getPlatformVersion() has not been implemented.');
+  }
+
+  /// Display a single track in Locus Map
+  Future<void> displayTrack(LocusTrack track) {
+    throw UnimplementedError('displayTrack() has not been implemented.');
+  }
+
+  /// Display multiple tracks in Locus Map
+  Future<void> displayTracks(List<LocusTrack> tracks) {
+    throw UnimplementedError('displayTracks() has not been implemented.');
+  }
+
+  /// Update a single track in Locus Map (for real-time updates)
+  Future<void> updateTrack(LocusTrack track) {
+    throw UnimplementedError('updateTrack() has not been implemented.');
+  }
+
+  /// Update multiple tracks in Locus Map (for real-time updates)
+  Future<void> updateTracks(List<LocusTrack> tracks) {
+    throw UnimplementedError('updateTracks() has not been implemented.');
+  }
+
+  /// Clear all tracks from Locus Map
+  Future<void> clearTracks() {
+    throw UnimplementedError('clearTracks() has not been implemented.');
+  }
+
+  /// Clear specific track by name from Locus Map
+  Future<void> clearTrackByName(String trackName) {
+    throw UnimplementedError('clearTrackByName() has not been implemented.');
   }
 }

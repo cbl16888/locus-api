@@ -15,8 +15,8 @@ class LocusApiFlutter {
   }
 
   /// Display a single point in Locus Map
-  Future<void> displayPoint(LocusPoint point) {
-    return LocusApiFlutterPlatform.instance.displayPoint(point);
+  Future<void> displayPoint(LocusPoint point, {String? imagePath}) {
+    return LocusApiFlutterPlatform.instance.displayPoint(point, imagePath: imagePath);
   }
 
   /// Display multiple points in Locus Map

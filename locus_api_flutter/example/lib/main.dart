@@ -93,7 +93,12 @@ class _MyHomePageState extends State<MyHomePage> {
           description: 'This is a test point from Flutter plugin',
         );
 
-        await _locusApiFlutterPlugin.displayPoint(point);
+        // 使用自定义图片路径（可以是assets路径或文件路径）
+        // 示例：使用assets中的图片
+        await _locusApiFlutterPlugin.displayPoint(
+          point, 
+          imagePath: 'assets/images/marker00.png'
+        );
         
         setState(() {
           _testPointDisplayed = true;
@@ -101,7 +106,7 @@ class _MyHomePageState extends State<MyHomePage> {
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('测试点位已显示')),
+            const SnackBar(content: Text('带自定义图标的测试点位已显示')),
           );
         }
       }

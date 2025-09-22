@@ -21,7 +21,7 @@ class MockLocusApiFlutterPlatform
   });
 
   @override
-  Future<void> displayPoint(LocusPoint point) => Future.value();
+  Future<void> displayPoint(LocusPoint point, {String? imagePath}) => Future.value();
 
   @override
   Future<void> displayPoints(List<LocusPoint> points) => Future.value();
@@ -76,6 +76,9 @@ class MockLocusApiFlutterPlatform
 
   @override
   Future<void> clearTrackByName(String trackName) => Future.value();
+
+  @override
+  Future<void> openLocusMap() => Future.value();
 }
 
 void main() {

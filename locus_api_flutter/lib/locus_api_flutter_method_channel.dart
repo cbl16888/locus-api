@@ -27,12 +27,13 @@ class MethodChannelLocusApiFlutter extends LocusApiFlutterPlatform {
   }
 
   @override
-  Future<void> displayPoint(LocusPoint point) async {
+  Future<void> displayPoint(LocusPoint point, {String? imagePath}) async {
     await methodChannel.invokeMethod('displayPoint', {
       'name': point.name,
       'latitude': point.latitude,
       'longitude': point.longitude,
       'description': point.description,
+      if (imagePath != null) 'imagePath': imagePath,
     });
   }
 

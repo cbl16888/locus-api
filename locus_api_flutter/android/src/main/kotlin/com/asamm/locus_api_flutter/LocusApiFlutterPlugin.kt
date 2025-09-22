@@ -26,6 +26,11 @@ import locus.api.objects.styles.GeoDataStyle
 import locus.api.objects.Storable
 import android.graphics.Color
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import java.io.File
+import java.io.FileInputStream
+import java.io.InputStream
 
 
 /** LocusApiFlutterPlugin */
@@ -97,9 +102,19 @@ class LocusApiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           val name = call.argument<String>("name") ?: ""
           val latitude = call.argument<Double>("latitude") ?: 0.0
           val longitude = call.argument<Double>("longitude") ?: 0.0
+          val imagePath = call.argument<String>("imagePath")
           
           val point = Point(name, Location(latitude, longitude))
           val packPoints = PackPoints(name)
+          
+          // 如果提供了图片路径，加载图片并设置为bitmap
+          if (imagePath != null && imagePath.isNotEmpty()) {
+            val bitmap = loadImageFromPath(imagePath)
+            if (bitmap != null) {
+              packPoints.bitmap = bitmap
+            }
+          }
+          
           packPoints.addPoint(point)
           
           val success = ActionDisplayPoints.sendPack(currentActivity, packPoints, ActionDisplayVarious.ExtraAction.NONE)
@@ -498,6 +513,45 @@ class LocusApiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
       }
     } catch (e: Exception) {
       result.error("LOCUS_API_ERROR", e.message, null)
+    }
+  }
+
+  private fun loadImageFromPath(imagePath: String): Bitmap? {
+    return try {
+      when {
+        // 处理assets路径 (flutter_assets/...)
+        imagePath.startsWith("assets/") -> {
+          val assetPath = "flutter_assets/$imagePath"
+          val inputStream = context.assets.open(assetPath)
+          BitmapFactory.decodeStream(inputStream)
+        }
+        // 处理绝对路径
+        imagePath.startsWith("/") -> {
+          val file = File(imagePath)
+          if (file.exists()) {
+            BitmapFactory.decodeFile(imagePath)
+          } else {
+            null
+          }
+        }
+        // 处理相对路径，假设在应用的文件目录中
+        else -> {
+          val file = File(context.filesDir, imagePath)
+          if (file.exists()) {
+            BitmapFactory.decodeFile(file.absolutePath)
+          } else {
+            // 尝试从assets加载
+            try {
+              val inputStream = context.assets.open(imagePath)
+              BitmapFactory.decodeStream(inputStream)
+            } catch (e: Exception) {
+              null
+            }
+          }
+        }
+      }
+    } catch (e: Exception) {
+      null
     }
   }
 

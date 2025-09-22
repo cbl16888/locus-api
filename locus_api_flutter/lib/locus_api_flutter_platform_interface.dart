@@ -31,7 +31,7 @@ abstract class LocusApiFlutterPlatform extends PlatformInterface {
   }
 
   /// Display a single point in Locus Map
-  Future<void> displayPoint(LocusPoint point) {
+  Future<void> displayPoint(LocusPoint point, {String? imagePath}) {
     throw UnimplementedError('displayPoint() has not been implemented.');
   }
 

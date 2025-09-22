@@ -152,4 +152,9 @@ class MethodChannelLocusApiFlutter extends LocusApiFlutterPlatform {
       'trackName': trackName,
     });
   }
+
+  @override
+  Future<void> openLocusMap() async {
+    await methodChannel.invokeMethod('openLocusMap');
+  }
 }

@@ -113,4 +113,8 @@ class LocusApiFlutter {
   Future<void> clearTrackByName(String trackName) {
     return LocusApiFlutterPlatform.instance.clearTrackByName(trackName);
   }
+
+  Future<void> openLocusMap() {
+    return LocusApiFlutterPlatform.instance.openLocusMap();
+  }
 }

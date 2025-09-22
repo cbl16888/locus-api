@@ -288,6 +288,7 @@ class _MyHomePageState extends State<MyHomePage> {
       }
       _updatePointsAndTracks(points);
     });
+    _locusApiFlutterPlugin.openLocusMap();
     _updatePointsAndTracks(points);
   }
 

@@ -129,4 +129,8 @@ abstract class LocusApiFlutterPlatform extends PlatformInterface {
   Future<void> clearTrackByName(String trackName) {
     throw UnimplementedError('clearTrackByName() has not been implemented.');
   }
+
+  Future<void> openLocusMap() {
+    throw UnimplementedError('openLocusMap() has not been implemented.');
+  }
 }

@@ -42,6 +42,9 @@ class LocusApiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   private lateinit var channel : MethodChannel
   private lateinit var context: Context
   private var activity: Activity? = null
+  
+  // Bitmap缓存，避免重复加载相同路径的图片
+  private val bitmapCache = mutableMapOf<String, Bitmap>()
 
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "locus_api_flutter")
@@ -134,7 +137,16 @@ class LocusApiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             return
           }
           
+          val imagePath = call.argument<String>("imagePath")
           val packPoints = PackPoints("Multiple Points")
+          
+          // 如果提供了图片路径，加载图片并设置为bitmap
+          if (imagePath != null && imagePath.isNotEmpty()) {
+            val bitmap = loadImageFromPath(imagePath)
+            if (bitmap != null) {
+              packPoints.bitmap = bitmap
+            }
+          }
           
           for (pointMap in pointsList) {
             val name = pointMap["name"] as? String ?: ""
@@ -179,9 +191,17 @@ class LocusApiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           val name = call.argument<String>("name") ?: ""
           val latitude = call.argument<Double>("latitude") ?: 0.0
           val longitude = call.argument<Double>("longitude") ?: 0.0
-          
+          val imagePath = call.argument<String>("imagePath")
+
           val point = Point(name, Location(latitude, longitude))
           val packPoints = PackPoints("RealTime_$name")
+          // 如果提供了图片路径，加载图片并设置为bitmap
+          if (imagePath != null && imagePath.isNotEmpty()) {
+            val bitmap = loadImageFromPath(imagePath)
+            if (bitmap != null) {
+              packPoints.bitmap = bitmap
+            }
+          }
           packPoints.addPoint(point)
           
           // 实时更新点位，不居中显示
@@ -201,7 +221,8 @@ class LocusApiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             result.success(true)
             return
           }
-          
+          val imagePath = call.argument<String>("imagePath")
+
           try {
             val locusVersion = LocusUtils.getActiveVersion(context)
             if (locusVersion != null) {
@@ -210,6 +231,13 @@ class LocusApiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
               
               // 创建一个包含所有更新点位的包
               val packPoints = PackPoints("RealTime_Updates")
+              // 如果提供了图片路径，加载图片并设置为bitmap
+              if (imagePath != null && imagePath.isNotEmpty()) {
+                val bitmap = loadImageFromPath(imagePath)
+                if (bitmap != null) {
+                  packPoints.bitmap = bitmap
+                }
+              }
               
               for (pointMap in pointsList) {
                 val name = pointMap["name"] as? String ?: ""
@@ -402,7 +430,7 @@ class LocusApiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             result.error("INVALID_ARGUMENTS", "Track data is required", null)
             return
           }
-          
+
           try {
             val track = createTrackFromMap(trackMap)
             val success = ActionDisplayTracks.sendTrackSilent(currentActivity, track, false)
@@ -424,9 +452,11 @@ class LocusApiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             result.success(true)
             return
           }
-          
+
           try {
-            val tracks = tracksList.map { createTrackFromMap(it) }
+            val tracks = tracksList.map { trackMap -> 
+              createTrackFromMap(trackMap)
+            }
             val success = ActionDisplayTracks.sendTracksSilent(currentActivity, tracks, false)
             result.success(success)
           } catch (e: Exception) {
@@ -517,8 +547,11 @@ class LocusApiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   }
 
   private fun loadImageFromPath(imagePath: String): Bitmap? {
+    // 先检查缓存
+    bitmapCache[imagePath]?.let { return it }
+    
     return try {
-      when {
+      val bitmap = when {
         // 处理assets路径 (flutter_assets/...)
         imagePath.startsWith("assets/") -> {
           val assetPath = "flutter_assets/$imagePath"
@@ -550,6 +583,10 @@ class LocusApiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           }
         }
       }
+      
+      // 将成功加载的bitmap加入缓存
+      bitmap?.let { bitmapCache[imagePath] = it }
+      bitmap
     } catch (e: Exception) {
       null
     }

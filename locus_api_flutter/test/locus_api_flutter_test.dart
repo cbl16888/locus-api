@@ -24,13 +24,13 @@ class MockLocusApiFlutterPlatform
   Future<void> displayPoint(LocusPoint point, {String? imagePath}) => Future.value();
 
   @override
-  Future<void> displayPoints(List<LocusPoint> points) => Future.value();
+  Future<void> displayPoints(List<LocusPoint> points, {String? imagePath}) => Future.value();
 
   @override
-  Future<void> updatePoint(LocusPoint point) => Future.value();
+  Future<void> updatePoint(LocusPoint point, {String? imagePath}) => Future.value();
 
   @override
-  Future<void> updatePoints(List<LocusPoint> points) => Future.value();
+  Future<void> updatePoints(List<LocusPoint> points, {String? imagePath}) => Future.value();
 
   @override
   Future<void> clearPoints() => Future.value();

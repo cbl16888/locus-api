@@ -6,9 +6,31 @@
 
 ## 使用方法
 
+### 单个点位
 ```dart
 await _locusApiFlutterPlugin.displayPoint(
   point, 
+  imagePath: 'your_image_path_here'
+);
+```
+
+### 多个点位
+```dart
+await _locusApiFlutterPlugin.displayPoints(
+  points, 
+  imagePath: 'your_image_path_here'
+);
+```
+
+### 轨迹更新
+```dart
+await _locusApiFlutterPlugin.updateTrack(
+  track, 
+  imagePath: 'your_image_path_here'
+);
+
+await _locusApiFlutterPlugin.updateTracks(
+  tracks, 
   imagePath: 'your_image_path_here'
 );
 ```
@@ -43,25 +65,37 @@ imagePath: 'images/marker.png'
 
 ### Android 端实现
 
-1. **图片加载方法** (`loadImageFromPath`):
+1. **图片缓存机制**:
+   - 使用 `bitmapCache` Map 缓存已加载的图片
+   - 避免重复加载相同路径的图片，提高性能
+   - 自动管理内存，减少重复的文件I/O操作
+
+2. **图片加载方法** (`loadImageFromPath`):
+   - 先检查缓存，如果存在直接返回
    - 支持多种路径格式的图片加载
    - 自动处理 Flutter assets 路径
    - 支持绝对路径和相对路径
+   - 成功加载后自动加入缓存
    - 错误处理和容错机制
 
-2. **PackPoints 集成**:
+3. **PackPoints 和 Track 集成**:
    - 将加载的 Bitmap 设置到 PackPoints.bitmap 属性
-   - 与现有的点位显示功能完全兼容
+   - 为轨迹样式设置自定义图标 (`setIconStyle`)
+   - 与现有的点位和轨迹显示功能完全兼容
 
 ### Flutter 端更新
 
 1. **方法签名更新**:
    - `displayPoint` 方法添加可选的 `imagePath` 参数
+   - `displayPoints` 方法添加可选的 `imagePath` 参数
+   - `updateTrack` 方法添加可选的 `imagePath` 参数
+   - `updateTracks` 方法添加可选的 `imagePath` 参数
    - 保持向后兼容性
 
 2. **平台接口更新**:
    - 所有相关接口文件都已更新
    - 支持图片路径参数传递
+   - 统一的参数处理机制
 
 ## 使用示例
 
@@ -93,7 +127,15 @@ await _locusApiFlutterPlugin.displayPoint(
 2. **图片大小**: 建议使用适当大小的图片以获得最佳显示效果
 3. **权限**: 访问外部存储的图片可能需要相应的权限
 4. **错误处理**: 如果图片加载失败，将使用默认的点位图标
-5. **性能**: 大图片可能影响性能，建议使用优化过的小图标
+5. **性能优化**: 
+   - 内置缓存机制，相同路径的图片只加载一次
+   - 大图片可能影响性能，建议使用优化过的小图标
+   - 缓存会在应用生命周期内保持，减少重复加载
+6. **支持的方法**: 
+   - `displayPoint` - 单个点位显示
+   - `displayPoints` - 多个点位显示
+   - `updateTrack` - 单个轨迹更新
+   - `updateTracks` - 多个轨迹更新
 
 ## 错误处理
 

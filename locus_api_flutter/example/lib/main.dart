@@ -301,7 +301,7 @@ class _MyHomePageState extends State<MyHomePage> {
   _updatePointsAndTracks(List<LocusPoint> points) async {
     try {
       // 1. 更新当前车辆位置点
-      await _locusApiFlutterPlugin.updatePoints(points);
+      await _locusApiFlutterPlugin.updatePoints(points, imagePath: "assets/images/marker02.png");
       
       // 2. 为每个车辆创建并显示轨迹线
       List<LocusTrack> tracks = [];

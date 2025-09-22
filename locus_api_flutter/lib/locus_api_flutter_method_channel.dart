@@ -38,9 +38,10 @@ class MethodChannelLocusApiFlutter extends LocusApiFlutterPlatform {
   }
 
   @override
-  Future<void> displayPoints(List<LocusPoint> points) async {
+  Future<void> displayPoints(List<LocusPoint> points, {String? imagePath}) async {
     await methodChannel.invokeMethod('displayPoints', {
       'points': points.map((p) => p.toMap()).toList(),
+      if (imagePath != null) 'imagePath': imagePath,
     });
   }
 
@@ -54,19 +55,21 @@ class MethodChannelLocusApiFlutter extends LocusApiFlutterPlatform {
   }
 
   @override
-  Future<void> updatePoint(LocusPoint point) async {
+  Future<void> updatePoint(LocusPoint point, {String? imagePath}) async {
     await methodChannel.invokeMethod('updatePoint', {
       'name': point.name,
       'latitude': point.latitude,
       'longitude': point.longitude,
       'description': point.description,
+      if (imagePath != null) 'imagePath': imagePath,
     });
   }
 
   @override
-  Future<void> updatePoints(List<LocusPoint> points) async {
+  Future<void> updatePoints(List<LocusPoint> points, {String? imagePath}) async {
     await methodChannel.invokeMethod('updatePoints', {
       'points': points.map((p) => p.toMap()).toList(),
+      if (imagePath != null) 'imagePath': imagePath,
     });
   }
 
@@ -129,16 +132,18 @@ class MethodChannelLocusApiFlutter extends LocusApiFlutterPlatform {
   }
 
   @override
-  Future<void> updateTrack(LocusTrack track) async {
+  Future<void> updateTrack(LocusTrack track, {String? imagePath}) async {
     await methodChannel.invokeMethod('updateTrack', {
       'track': track.toMap(),
+      if (imagePath != null) 'imagePath': imagePath,
     });
   }
 
   @override
-  Future<void> updateTracks(List<LocusTrack> tracks) async {
+  Future<void> updateTracks(List<LocusTrack> tracks, {String? imagePath}) async {
     await methodChannel.invokeMethod('updateTracks', {
       'tracks': tracks.map((t) => t.toMap()).toList(),
+      if (imagePath != null) 'imagePath': imagePath,
     });
   }
 

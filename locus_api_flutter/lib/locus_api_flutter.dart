@@ -20,18 +20,18 @@ class LocusApiFlutter {
   }
 
   /// Display multiple points in Locus Map
-  Future<void> displayPoints(List<LocusPoint> points) {
-    return LocusApiFlutterPlatform.instance.displayPoints(points);
+  Future<void> displayPoints(List<LocusPoint> points, {String? imagePath}) {
+    return LocusApiFlutterPlatform.instance.displayPoints(points, imagePath: imagePath);
   }
 
   /// Update a single point in Locus Map (for real-time updates)
-  Future<void> updatePoint(LocusPoint point) {
-    return LocusApiFlutterPlatform.instance.updatePoint(point);
+  Future<void> updatePoint(LocusPoint point, {String? imagePath}) {
+    return LocusApiFlutterPlatform.instance.updatePoint(point, imagePath: imagePath);
   }
 
   /// Update multiple points in Locus Map (for real-time updates)
-  Future<void> updatePoints(List<LocusPoint> points) {
-    return LocusApiFlutterPlatform.instance.updatePoints(points);
+  Future<void> updatePoints(List<LocusPoint> points, {String? imagePath}) {
+    return LocusApiFlutterPlatform.instance.updatePoints(points, imagePath: imagePath);
   }
 
   /// Clear all points from Locus Map

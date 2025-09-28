@@ -191,7 +191,7 @@ class LocusApiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           val name = call.argument<String>("name") ?: ""
           val latitude = call.argument<Double>("latitude") ?: 0.0
           val longitude = call.argument<Double>("longitude") ?: 0.0
-          val imagePath = call.argument<String>("imagePath")
+          val imagePath = call.argument<String>("icon")
 
           val point = Point(name, Location(latitude, longitude))
           val packPoints = PackPoints("RealTime_$name")
@@ -221,36 +221,52 @@ class LocusApiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             result.success(true)
             return
           }
-          val imagePath = call.argument<String>("imagePath")
 
           try {
             val locusVersion = LocusUtils.getActiveVersion(context)
             if (locusVersion != null) {
-              // 使用批量更新方式：先清除旧的点位，然后添加新的点位
-              // 这样可以确保点位位置得到正确更新
+              // 按图标路径分组点位，相同图标的点位放在同一个PackPoints中
+              val pointsByIcon = mutableMapOf<String?, MutableList<Map<String, Any>>>()
               
-              // 创建一个包含所有更新点位的包
-              val packPoints = PackPoints("RealTime_Updates")
-              // 如果提供了图片路径，加载图片并设置为bitmap
-              if (imagePath != null && imagePath.isNotEmpty()) {
-                val bitmap = loadImageFromPath(imagePath)
-                if (bitmap != null) {
-                  packPoints.bitmap = bitmap
+              for (pointMap in pointsList) {
+                val iconPath = pointMap["icon"] as? String
+                val key = iconPath ?: "default" // 没有图标的点位使用"default"键
+                pointsByIcon.getOrPut(key) { mutableListOf() }.add(pointMap)
+              }
+              
+              var allSuccess = true
+              
+              // 为每组相同图标的点位创建单独的PackPoints
+              pointsByIcon.forEach { (iconPath, points) ->
+                val packName = if (iconPath == "default") "RealTime_Updates_Default" else "RealTime_Updates_${iconPath.hashCode()}"
+                val packPoints = PackPoints(packName)
+                
+                // 如果有图标路径，为这个包设置图标
+                if (iconPath != null && iconPath != "default" && iconPath.isNotEmpty()) {
+                  val bitmap = loadImageFromPath(iconPath)
+                  if (bitmap != null) {
+                    packPoints.bitmap = bitmap
+                  }
+                }
+                
+                // 添加所有使用相同图标的点位
+                for (pointMap in points) {
+                  val name = pointMap["name"] as? String ?: ""
+                  val latitude = pointMap["latitude"] as? Double ?: 0.0
+                  val longitude = pointMap["longitude"] as? Double ?: 0.0
+                  
+                  val point = Point(name, Location(latitude, longitude))
+                  packPoints.addPoint(point)
+                }
+                
+                // 发送这个包
+                val success = ActionDisplayPoints.sendPackSilent(currentActivity, packPoints, false)
+                if (!success) {
+                  allSuccess = false
                 }
               }
               
-              for (pointMap in pointsList) {
-                val name = pointMap["name"] as? String ?: ""
-                val latitude = pointMap["latitude"] as? Double ?: 0.0
-                val longitude = pointMap["longitude"] as? Double ?: 0.0
-                
-                val point = Point(name, Location(latitude, longitude))
-                packPoints.addPoint(point)
-              }
-              
-              // 使用静默模式发送更新，这样不会干扰用户界面
-              val success = ActionDisplayPoints.sendPackSilent(currentActivity, packPoints, false)
-              result.success(success)
+              result.success(allSuccess)
             } else {
               result.success(false)
             }

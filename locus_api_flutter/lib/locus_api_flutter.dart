@@ -25,13 +25,13 @@ class LocusApiFlutter {
   }
 
   /// Update a single point in Locus Map (for real-time updates)
-  Future<void> updatePoint(LocusPoint point, {String? imagePath}) {
-    return LocusApiFlutterPlatform.instance.updatePoint(point, imagePath: imagePath);
+  Future<void> updatePoint(LocusPoint point) {
+    return LocusApiFlutterPlatform.instance.updatePoint(point);
   }
 
   /// Update multiple points in Locus Map (for real-time updates)
-  Future<void> updatePoints(List<LocusPoint> points, {String? imagePath}) {
-    return LocusApiFlutterPlatform.instance.updatePoints(points, imagePath: imagePath);
+  Future<void> updatePoints(List<LocusPoint> points) {
+    return LocusApiFlutterPlatform.instance.updatePoints(points);
   }
 
   /// Clear all points from Locus Map

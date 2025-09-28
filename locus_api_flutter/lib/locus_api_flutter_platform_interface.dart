@@ -41,12 +41,12 @@ abstract class LocusApiFlutterPlatform extends PlatformInterface {
   }
 
   /// Update a single point in Locus Map (for real-time updates)
-  Future<void> updatePoint(LocusPoint point, {String? imagePath}) {
+  Future<void> updatePoint(LocusPoint point) {
     throw UnimplementedError('updatePoint() has not been implemented.');
   }
 
   /// Update multiple points in Locus Map (for real-time updates)
-  Future<void> updatePoints(List<LocusPoint> points, {String? imagePath}) {
+  Future<void> updatePoints(List<LocusPoint> points) {
     throw UnimplementedError('updatePoints() has not been implemented.');
   }
 

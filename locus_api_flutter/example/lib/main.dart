@@ -233,9 +233,9 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> _startRealTimeUpdate() async {
     // 模拟实时更新多个点位（比如好友位置）
     final points = [
-      LocusPoint(id: 0, name: 'Bookir', latitude: 24.485408, longitude: 118.164626, description: '实时位置更新 - Bookir', trackPoints: []),
-      LocusPoint(id: 1, name: 'Locus', latitude: 24.485408, longitude: 118.175725, description: '实时位置更新 - Locus', trackPoints: []),
-      LocusPoint(id: 2, name: 'Jack', latitude: 24.485408, longitude: 118.186824, description: '实时位置更新 - Jack', trackPoints: []),
+      LocusPoint(id: 0, name: 'Bookir', latitude: 24.485408, longitude: 118.164626, description: '实时位置更新 - Bookir', trackPoints: [], icon: "assets/images/marker00.png"),
+      LocusPoint(id: 1, name: 'Locus', latitude: 24.485408, longitude: 118.175725, description: '实时位置更新 - Locus', trackPoints: [], icon: "assets/images/marker01.png"),
+      LocusPoint(id: 2, name: 'Jack', latitude: 24.485408, longitude: 118.186824, description: '实时位置更新 - Jack', trackPoints: [], icon: "assets/images/marker02.png"),
     ];
 
     // 初始化轨迹数据
@@ -282,7 +282,7 @@ class _MyHomePageState extends State<MyHomePage> {
   _updatePointsAndTracks(List<LocusPoint> points) async {
     try {
       // 1. 更新当前好友位置点
-      await _locusApiFlutterPlugin.updatePoints(points, imagePath: "assets/images/marker02.png");
+      await _locusApiFlutterPlugin.updatePoints(points);
 
       // 2. 为每个好友创建并显示轨迹线
       List<LocusTrack> tracks = [];

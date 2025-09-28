@@ -55,21 +55,20 @@ class MethodChannelLocusApiFlutter extends LocusApiFlutterPlatform {
   }
 
   @override
-  Future<void> updatePoint(LocusPoint point, {String? imagePath}) async {
+  Future<void> updatePoint(LocusPoint point) async {
     await methodChannel.invokeMethod('updatePoint', {
       'name': point.name,
       'latitude': point.latitude,
       'longitude': point.longitude,
       'description': point.description,
-      if (imagePath != null) 'imagePath': imagePath,
+      'icon': point.icon ?? ''
     });
   }
 
   @override
-  Future<void> updatePoints(List<LocusPoint> points, {String? imagePath}) async {
+  Future<void> updatePoints(List<LocusPoint> points) async {
     await methodChannel.invokeMethod('updatePoints', {
-      'points': points.map((p) => p.toMap()).toList(),
-      if (imagePath != null) 'imagePath': imagePath,
+      'points': points.map((p) => p.toMap()).toList()
     });
   }
 

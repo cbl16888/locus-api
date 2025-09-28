@@ -99,30 +99,30 @@ configure([
         }
 
         // signing of versions
-        signingConfigs {
-            debug {
-                storeFile file(System.getenv('ANDROID_SIGN_DEBUG').split("\\|")[0])
-                storePassword System.getenv('ANDROID_SIGN_DEBUG').split("\\|")[1]
-                keyAlias System.getenv('ANDROID_SIGN_DEBUG').split("\\|")[2]
-                keyPassword System.getenv('ANDROID_SIGN_DEBUG').split("\\|")[3]
-            }
-            release {
-                storeFile file(System.getenv('ANDROID_SIGN_RELEASE').split("\\|")[0])
-                storePassword System.getenv('ANDROID_SIGN_RELEASE').split("\\|")[1]
-                keyAlias System.getenv('ANDROID_SIGN_RELEASE').split("\\|")[2]
-                keyPassword System.getenv('ANDROID_SIGN_RELEASE').split("\\|")[3]
-            }
-        }
+//        signingConfigs {
+//            debug {
+//                storeFile file(System.getenv('ANDROID_SIGN_DEBUG').split("\\|")[0])
+//                storePassword System.getenv('ANDROID_SIGN_DEBUG').split("\\|")[1]
+//                keyAlias System.getenv('ANDROID_SIGN_DEBUG').split("\\|")[2]
+//                keyPassword System.getenv('ANDROID_SIGN_DEBUG').split("\\|")[3]
+//            }
+//            release {
+//                storeFile file(System.getenv('ANDROID_SIGN_RELEASE').split("\\|")[0])
+//                storePassword System.getenv('ANDROID_SIGN_RELEASE').split("\\|")[1]
+//                keyAlias System.getenv('ANDROID_SIGN_RELEASE').split("\\|")[2]
+//                keyPassword System.getenv('ANDROID_SIGN_RELEASE').split("\\|")[3]
+//            }
+//        }
 
         // building task
-        buildTypes {
-            debug {
-                signingConfig signingConfigs.debug
-            }
-            release {
-                signingConfig signingConfigs.release
-            }
-        }
+//        buildTypes {
+//            debug {
+//                signingConfig signingConfigs.debug
+//            }
+//            release {
+//                signingConfig signingConfigs.release
+//            }
+//        }
     }
 
     // iterate over all versions

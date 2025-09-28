@@ -231,44 +231,25 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _startRealTimeUpdate() async {
-    // 模拟实时更新多个点位（比如车辆位置）
+    // 模拟实时更新多个点位（比如好友位置）
     final points = [
-      LocusPoint(
-        name: '车辆1',
-        latitude: 24.485408,
-        longitude: 118.164626,
-        description: '实时位置更新 - 车辆1',
-      ),
-      LocusPoint(
-        name: '车辆2',
-        latitude: 24.485408,
-        longitude: 118.175725,
-        description: '实时位置更新 - 车辆2',
-      ),
-      LocusPoint(
-        name: '车辆3',
-        latitude: 24.485408,
-        longitude: 118.186824,
-        description: '实时位置更新 - 车辆3',
-      ),
+      LocusPoint(id: 0, name: 'Bookir', latitude: 24.485408, longitude: 118.164626, description: '实时位置更新 - Bookir', trackPoints: []),
+      LocusPoint(id: 1, name: 'Locus', latitude: 24.485408, longitude: 118.175725, description: '实时位置更新 - Locus', trackPoints: []),
+      LocusPoint(id: 2, name: 'Jack', latitude: 24.485408, longitude: 118.186824, description: '实时位置更新 - Jack', trackPoints: []),
     ];
-    
+
     // 初始化轨迹数据
     for (var point in points) {
-      _vehicleTrajectories[point.name] = [
-        LocusTrackPoint(
-          latitude: point.latitude,
-          longitude: point.longitude,
-          timestamp: DateTime.now().millisecondsSinceEpoch,
-        )
-      ];
+      point.trackPoints?.add(LocusTrackPoint(
+        latitude: point.latitude,
+        longitude: point.longitude,
+        timestamp: DateTime.now().millisecondsSinceEpoch,
+      ));
     }
 
     _timer?.cancel();
-    _timer = Timer.periodic(Duration(seconds: 5), (timer) {
-
+    _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
       for (var point in points) {
-
         var factor = Random().nextDouble() * 0.001;
         var factor2 = Random().nextDouble() * 0.001;
         var add = Random().nextBool();
@@ -285,7 +266,7 @@ class _MyHomePageState extends State<MyHomePage> {
           point.longitude -= factor2;
         }
         // 保存当前位置到轨迹历史
-        _vehicleTrajectories[point.name]?.add(LocusTrackPoint(
+        point.trackPoints?.add(LocusTrackPoint(
           latitude: point.latitude,
           longitude: point.longitude,
           timestamp: DateTime.now().millisecondsSinceEpoch,
@@ -300,39 +281,37 @@ class _MyHomePageState extends State<MyHomePage> {
   /// 使用真正的轨迹API显示轨迹连线
   _updatePointsAndTracks(List<LocusPoint> points) async {
     try {
-      // 1. 更新当前车辆位置点
+      // 1. 更新当前好友位置点
       await _locusApiFlutterPlugin.updatePoints(points, imagePath: "assets/images/marker02.png");
-      
-      // 2. 为每个车辆创建并显示轨迹线
+
+      // 2. 为每个好友创建并显示轨迹线
       List<LocusTrack> tracks = [];
-      
-      for (var vehicleName in _vehicleTrajectories.keys) {
-        var trajectoryPoints = _vehicleTrajectories[vehicleName] ?? [];
-        
-        if (trajectoryPoints.isNotEmpty) {
+
+      for (var point in points) {
+        if (point.trackPoints != null && point.trackPoints!.isNotEmpty) {
           // 创建轨迹对象
           var track = LocusTrack(
-            name: '${vehicleName}_轨迹',
-            points: trajectoryPoints.length == 1 ? [trajectoryPoints[0], trajectoryPoints[0]] : trajectoryPoints,
-            description: '$vehicleName 的移动轨迹',
-            color: _getVehicleColor(vehicleName), // 为不同车辆设置不同颜色
+            name: '${point.name}_轨迹',
+            points: point.trackPoints!.length == 1 ? [point.trackPoints![0], point.trackPoints![0]] : point.trackPoints!,
+            description: '${point.name} 的移动轨迹',
+            color: _getFriendTrackColor(point.id!), // 为不同好友设置不同颜色
             width: 1.0, // 增加轨迹线宽度到5像素，更容易看到
           );
           tracks.add(track);
         }
       }
-      
+
       // 3. 更新所有轨迹线
       if (tracks.isNotEmpty) {
         await _locusApiFlutterPlugin.updateTracks(tracks);
       }
-      
-      debugPrint("实时点位和轨迹线已更新 - ${points.length} 个车辆，${tracks.length} 条轨迹");
-      
+
+      debugPrint("实时点位和轨迹线已更新 - ${points.length} 个好友，${tracks.length} 条轨迹");
+
       // 打印轨迹统计信息
-      for (var vehicleName in _vehicleTrajectories.keys) {
-        var count = _vehicleTrajectories[vehicleName]?.length ?? 0;
-        debugPrint("$vehicleName 轨迹点数量: $count");
+      for (var point in points) {
+        var count = point.trackPoints?.length ?? 0;
+        debugPrint("${point.name} 轨迹点数量: $count");
       }
     } catch (e) {
       debugPrint("更新点位和轨迹失败: $e");
@@ -340,17 +319,21 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   /// 为不同车辆分配不同的轨迹颜色
-  String _getVehicleColor(String vehicleName) {
-    switch (vehicleName) {
-      case '车辆1':
-        return '#FF0000'; // 红色
-      case '车辆2':
-        return '#00FF00'; // 绿色
-      case '车辆3':
-        return '#0000FF'; // 蓝色
-      default:
-        return '#FF00FF'; // 紫色
-    }
+  String _getFriendTrackColor(int id) {
+    final colors = ['#FF0000', '#00FF00', '#0000FF', '#FF00FF'];
+    return colors[_calculateTrackColorIndex(id, colors.length)];
+  }
+
+  // 获取用户头像算法
+  int _calculateTrackColorIndex(int number, int length) {
+    // 将数字转为字符串，再转为字符列表，最后转为整数列表
+    List<int> digits = number.toString().split('').map((char) => int.parse(char)).toList();
+
+    // 计算所有数字的和
+    int sum = digits.reduce((a, b) => a + b);
+
+    // 返回余数
+    return sum % length;
   }
 
   Future<void> _clearAllPoints() async {

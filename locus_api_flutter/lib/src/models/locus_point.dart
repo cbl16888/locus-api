@@ -1,28 +1,31 @@
+import 'locus_track.dart';
+
 /// Represents a geographical point that can be displayed in Locus Map
 class LocusPoint {
   /// Unique identifier for the point
-  final String? id;
-  
+  final int? id;
+
   /// Display name of the point
   final String name;
-  
+
   /// Latitude coordinate
   late double latitude;
-  
+
   /// Longitude coordinate
   late double longitude;
-  
+
   /// Altitude in meters (optional)
   final double? altitude;
-  
+
   /// Description text
   final String? description;
-  
+
   /// Icon name or path
   final String? icon;
-  
+
   /// Additional parameters
   final Map<String, dynamic>? extraData;
+  final List<LocusTrackPoint>? trackPoints;
 
   LocusPoint({
     this.id,
@@ -33,11 +36,12 @@ class LocusPoint {
     this.description,
     this.icon,
     this.extraData,
+    this.trackPoints
   });
 
   /// Convert to map for platform channel communication
   Map<String, dynamic> toMap() {
-    return {
+    var map = {
       'id': id,
       'name': name,
       'latitude': latitude,
@@ -45,23 +49,28 @@ class LocusPoint {
       'altitude': altitude,
       'description': description,
       'icon': icon,
-      'extraData': extraData,
+      'extraData': extraData
     };
+    if (trackPoints != null && trackPoints!.isNotEmpty) {
+      map["trackPoints"] = trackPoints!.map((item) => item.toMap()).toList();
+    }
+    return map;
   }
 
   /// Create from map received from platform channel
   factory LocusPoint.fromMap(Map<String, dynamic> map) {
     return LocusPoint(
-      id: map['id'],
-      name: map['name'] ?? '',
-      latitude: map['latitude']?.toDouble() ?? 0.0,
-      longitude: map['longitude']?.toDouble() ?? 0.0,
-      altitude: map['altitude']?.toDouble(),
-      description: map['description'],
-      icon: map['icon'],
-      extraData: map['extraData'] != null 
-          ? Map<String, dynamic>.from(map['extraData']) 
-          : null,
+        id: map['id'],
+        name: map['name'] ?? '',
+        latitude: map['latitude']?.toDouble() ?? 0.0,
+        longitude: map['longitude']?.toDouble() ?? 0.0,
+        altitude: map['altitude']?.toDouble(),
+        description: map['description'],
+        icon: map['icon'],
+        extraData: map['extraData'] != null
+            ? Map<String, dynamic>.from(map['extraData'])
+            : null,
+        trackPoints: map['trackPoints']?.map((item) => LocusTrackPoint.fromMap(item))
     );
   }
 

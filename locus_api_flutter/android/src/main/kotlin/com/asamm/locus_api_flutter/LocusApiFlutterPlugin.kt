@@ -22,12 +22,14 @@ import locus.api.android.utils.LocusUtils
 import locus.api.objects.extra.Location
 import locus.api.objects.geoData.Point
 import locus.api.objects.geoData.Track
+import locus.api.objects.geoData.Circle
 import locus.api.objects.styles.GeoDataStyle
 import locus.api.objects.Storable
 import android.graphics.Color
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
@@ -553,6 +555,329 @@ class LocusApiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           result.success(success)
         }
         
+        "getActiveVersionInfo" -> {
+          val lv = LocusUtils.getActiveVersion(context)
+          if (lv != null) {
+            val info = mapOf(
+              "packageName" to lv.packageName,
+              "versionName" to lv.versionName,
+              "versionCode" to lv.versionCode
+            )
+            result.success(info)
+          } else {
+            result.success(null)
+          }
+        }
+
+        "openPointDetailById" -> {
+          val currentActivity = activity
+          if (currentActivity == null) {
+            result.error("NO_ACTIVITY", "No activity available", null)
+            return
+          }
+          val itemId = (call.argument<Number>("itemId") ?: -1L).toLong()
+          if (itemId <= 0) {
+            result.error("INVALID_ARGUMENTS", "itemId is required > 0", null)
+            return
+          }
+          try {
+            val intent = Intent(LocusConst.ACTION_DISPLAY_POINT_SCREEN)
+            intent.putExtra(LocusConst.INTENT_EXTRA_ITEM_ID, itemId)
+            currentActivity.startActivity(intent)
+            result.success(true)
+          } catch (e: Exception) {
+            result.error("LOCUS_API_ERROR", e.message, null)
+          }
+        }
+
+        "startNavigationById" -> {
+          val currentActivity = activity
+          if (currentActivity == null) {
+            result.error("NO_ACTIVITY", "No activity available", null)
+            return
+          }
+          val itemId = (call.argument<Number>("itemId") ?: -1L).toLong()
+          if (itemId <= 0) {
+            result.error("INVALID_ARGUMENTS", "itemId is required > 0", null)
+            return
+          }
+          try {
+            val intent = Intent(LocusConst.ACTION_NAVIGATION_START)
+            intent.putExtra(LocusConst.INTENT_EXTRA_ITEM_ID, itemId)
+            currentActivity.startActivity(intent)
+            result.success(true)
+          } catch (e: Exception) {
+            result.error("LOCUS_API_ERROR", e.message, null)
+          }
+        }
+
+        "startGuidingById" -> {
+          val currentActivity = activity
+          if (currentActivity == null) {
+            result.error("NO_ACTIVITY", "No activity available", null)
+            return
+          }
+          val itemId = (call.argument<Number>("itemId") ?: -1L).toLong()
+          if (itemId <= 0) {
+            result.error("INVALID_ARGUMENTS", "itemId is required > 0", null)
+            return
+          }
+          try {
+            val intent = Intent(LocusConst.ACTION_GUIDING_START)
+            intent.putExtra(LocusConst.INTENT_EXTRA_ITEM_ID, itemId)
+            currentActivity.startActivity(intent)
+            result.success(true)
+          } catch (e: Exception) {
+            result.error("LOCUS_API_ERROR", e.message, null)
+          }
+        }
+
+        "openAddress" -> {
+          val currentActivity = activity
+          if (currentActivity == null) {
+            result.error("NO_ACTIVITY", "No activity available", null)
+            return
+          }
+          val address = call.argument<String>("address") ?: ""
+          if (address.isBlank()) {
+            result.error("INVALID_ARGUMENTS", "address is required", null)
+            return
+          }
+          try {
+            val intent = Intent(LocusConst.ACTION_NAVIGATION_START)
+            intent.putExtra(LocusConst.INTENT_EXTRA_ADDRESS_TEXT, address)
+            currentActivity.startActivity(intent)
+            result.success(true)
+          } catch (e: Exception) {
+            result.error("LOCUS_API_ERROR", e.message, null)
+          }
+        }
+
+        "navigateTo" -> {
+          val currentActivity = activity
+          if (currentActivity == null) {
+            result.error("NO_ACTIVITY", "No activity available", null)
+            return
+          }
+          val name = call.argument<String>("name")
+          val latitude = call.argument<Double>("latitude") ?: 0.0
+          val longitude = call.argument<Double>("longitude") ?: 0.0
+          try {
+            val intent = Intent(LocusConst.ACTION_NAVIGATION_START)
+            name?.takeIf { it.isNotBlank() }?.let {
+              intent.putExtra(LocusConst.INTENT_EXTRA_NAME, it)
+            }
+            intent.putExtra(LocusConst.INTENT_EXTRA_LATITUDE, latitude)
+            intent.putExtra(LocusConst.INTENT_EXTRA_LONGITUDE, longitude)
+            currentActivity.startActivity(intent)
+            result.success(true)
+          } catch (e: Exception) {
+            result.error("LOCUS_API_ERROR", e.message, null)
+          }
+        }
+
+        "addNewWmsMap" -> {
+          val currentActivity = activity
+          if (currentActivity == null) {
+            result.error("NO_ACTIVITY", "No activity available", null)
+            return
+          }
+          val url = call.argument<String>("url") ?: ""
+          if (url.isBlank()) {
+            result.error("INVALID_ARGUMENTS", "url is required", null)
+            return
+          }
+          try {
+            val intent = Intent(LocusConst.ACTION_ADD_NEW_WMS_MAP)
+            intent.putExtra(LocusConst.INTENT_EXTRA_ADD_NEW_WMS_MAP_URL, url)
+            currentActivity.startActivity(intent)
+            result.success(true)
+          } catch (e: Exception) {
+            result.error("LOCUS_API_ERROR", e.message, null)
+          }
+        }
+
+        // Import points from file URI
+        "importPointsFromFile" -> {
+          val fileUriStr = call.argument<String>("fileUri") ?: ""
+          val centerOnData = call.argument<Boolean>("centerOnData") ?: true
+          if (fileUriStr.isBlank()) {
+            result.error("INVALID_ARGUMENTS", "fileUri is required", null)
+            return
+          }
+          try {
+            val lv = LocusUtils.getActiveVersion(context)
+            if (lv == null) { result.success(false); return }
+            val uri = Uri.parse(fileUriStr)
+            val intent = Intent(LocusConst.ACTION_DISPLAY_DATA).apply {
+              setPackage(lv.packageName)
+              addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+              putExtra(LocusConst.INTENT_EXTRA_POINTS_FILE_URI, uri)
+              putExtra(LocusConst.INTENT_EXTRA_CALL_IMPORT, true)
+              putExtra(LocusConst.INTENT_EXTRA_CENTER_ON_DATA, centerOnData)
+            }
+            LocusUtils.sendBroadcast(context, intent, lv)
+            result.success(true)
+          } catch (e: Exception) {
+            result.error("LOCUS_API_ERROR", e.message, null)
+          }
+        }
+
+        // Import tracks from file URI
+        "importTracksFromFile" -> {
+          val currentActivity = activity ?: run {
+            result.error("NO_ACTIVITY", "No activity available", null); return
+          }
+          val fileUriStr = call.argument<String>("fileUri") ?: ""
+          val centerOnData = call.argument<Boolean>("centerOnData") ?: true
+          if (fileUriStr.isBlank()) {
+            result.error("INVALID_ARGUMENTS", "fileUri is required", null)
+            return
+          }
+          try {
+            val lv = LocusUtils.getActiveVersion(context)
+            if (lv == null) { result.success(false); return }
+            val uri = Uri.parse(fileUriStr)
+            val intent = Intent(LocusConst.ACTION_DISPLAY_DATA).apply {
+              setPackage(lv.packageName)
+              addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+              putExtra(LocusConst.INTENT_EXTRA_TRACKS_FILE_URI, uri)
+              putExtra(LocusConst.INTENT_EXTRA_CALL_IMPORT, true)
+              putExtra(LocusConst.INTENT_EXTRA_CENTER_ON_DATA, centerOnData)
+            }
+            LocusUtils.sendBroadcast(currentActivity, intent, lv)
+            result.success(true)
+          } catch (e: Exception) {
+            result.error("LOCUS_API_ERROR", e.message, null)
+          }
+        }
+
+        // View file in Locus (no import), relies on mimeType if provided
+        "viewFileInLocus" -> {
+          val currentActivity = activity
+          if (currentActivity == null) {
+            result.error("NO_ACTIVITY", "No activity available", null)
+            return
+          }
+          val fileUriStr = call.argument<String>("fileUri") ?: ""
+          val mimeType = call.argument<String>("mimeType")
+          if (fileUriStr.isBlank()) {
+            result.error("INVALID_ARGUMENTS", "fileUri is required", null)
+            return
+          }
+          try {
+            val lv = LocusUtils.getActiveVersion(context)
+            if (lv == null) { result.success(false); return }
+            val uri = Uri.parse(fileUriStr)
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+              setPackage(lv.packageName)
+              addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+              if (mimeType.isNullOrBlank()) setData(uri) else setDataAndType(uri, mimeType)
+            }
+            currentActivity.startActivity(intent)
+            result.success(true)
+          } catch (e: Exception) {
+            result.error("LOCUS_API_ERROR", e.message, null)
+          }
+        }
+
+        // Display circles on map
+        "displayCircles" -> {
+          val circlesArg = call.argument<List<Map<String, Any>>>("circles") ?: emptyList()
+          val centerOnData = call.argument<Boolean>("centerOnData") ?: false
+          try {
+            val lv = LocusUtils.getActiveVersion(context)
+            if (lv == null) { result.success(false); return }
+            val circles = circlesArg.map { m ->
+              val lat = (m["latitude"] as? Number)?.toDouble() ?: 0.0
+              val lon = (m["longitude"] as? Number)?.toDouble() ?: 0.0
+              val r = (m["radius"] as? Number)?.toDouble() ?: 0.0
+              val name = m["name"] as? String ?: ""
+              Circle().apply {
+                this.name = name
+                // TODO: 设置圆心与半径，需根据所用 Locus API 版本的 Circle 接口：
+                // 可能是 setLocation(Location(...)) / setRadiusMeters(r)
+                // 或者 location = Location(...), radius = r
+                // 请确认 API 定义后再改回正确字段/方法
+                // 示例（待确认）：
+                // setLocation(Location(lat, lon))
+                // setRadiusMeters(r)
+              }
+            }
+            val intent = Intent(LocusConst.ACTION_DISPLAY_DATA_SILENTLY).apply {
+              setPackage(lv.packageName)
+              putExtra(LocusConst.INTENT_EXTRA_CIRCLES_MULTI, Storable.getAsBytes(circles))
+              putExtra(LocusConst.INTENT_EXTRA_CENTER_ON_DATA, centerOnData)
+            }
+            LocusUtils.sendBroadcast(context, intent, lv)
+            result.success(true)
+          } catch (e: Throwable) {
+            result.error("LOCUS_API_ERROR", e.message, null)
+          }
+        }
+
+        // Remove circles by ids, or clear all if ids empty (best-effort)
+        "removeCirclesByIds" -> {
+          try {
+            val lv = LocusUtils.getActiveVersion(context)
+            if (lv == null) { result.success(false); return }
+            // 采用发送空集合的方式做清理（best-effort，与 clearTracks 一致）
+            val intent = Intent(LocusConst.ACTION_DISPLAY_DATA_SILENTLY).apply {
+              setPackage(lv.packageName)
+              putExtra(LocusConst.INTENT_EXTRA_CIRCLES_MULTI, Storable.getAsBytes(emptyList<Circle>()))
+              putExtra(LocusConst.INTENT_EXTRA_CENTER_ON_DATA, false)
+            }
+            LocusUtils.sendBroadcast(context, intent, lv)
+            result.success(true)
+          } catch (e: Throwable) {
+            result.error("LOCUS_API_ERROR", e.message, null)
+          }
+        }
+
+        // Open Field Notes list, optionally start create log
+        "openFieldNotes" -> {
+          val currentActivity = activity
+          if (currentActivity == null) {
+            result.error("NO_ACTIVITY", "No activity available", null)
+            return
+          }
+          val createLog = call.argument<Boolean>("createLog") ?: false
+          try {
+            val intent = Intent(LocusConst.ACTION_LOG_FIELD_NOTES).apply {
+              putExtra(LocusConst.INTENT_EXTRA_FIELD_NOTES_CREATE_LOG, createLog)
+            }
+            currentActivity.startActivity(intent)
+            result.success(true)
+          } catch (e: Throwable) {
+            result.error("LOCUS_API_ERROR", e.message, null)
+          }
+        }
+
+        // Log Field Notes by ids
+        "logFieldNotes" -> {
+          val currentActivity = activity
+          if (currentActivity == null) {
+            result.error("NO_ACTIVITY", "No activity available", null)
+            return
+          }
+          val ids = call.argument<List<Long>>("ids") ?: emptyList()
+          val createLog = call.argument<Boolean>("createLog") ?: true
+          if (ids.isEmpty()) {
+            result.error("INVALID_ARGUMENTS", "ids is required", null)
+            return
+          }
+          try {
+            val intent = Intent(LocusConst.ACTION_LOG_FIELD_NOTES).apply {
+              putExtra(LocusConst.INTENT_EXTRA_FIELD_NOTES_IDS, ids.toLongArray())
+              putExtra(LocusConst.INTENT_EXTRA_FIELD_NOTES_CREATE_LOG, createLog)
+            }
+            currentActivity.startActivity(intent)
+            result.success(true)
+          } catch (e: Throwable) {
+            result.error("LOCUS_API_ERROR", e.message, null)
+          }
+        }
+
         else -> {
           result.notImplemented()
         }

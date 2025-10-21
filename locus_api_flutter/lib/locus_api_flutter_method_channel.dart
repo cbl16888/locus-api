@@ -162,4 +162,130 @@ class MethodChannelLocusApiFlutter extends LocusApiFlutterPlatform {
   Future<void> openLocusMap() async {
     await methodChannel.invokeMethod('openLocusMap');
   }
+
+  @override
+  Future<void> importPointsFromFile(String fileUri, {bool centerOnData = true}) async {
+    await methodChannel.invokeMethod('importPointsFromFile', {
+      'fileUri': fileUri,
+      'centerOnData': centerOnData,
+    });
+  }
+
+  @override
+  Future<void> importTracksFromFile(String fileUri, {bool centerOnData = true}) async {
+    await methodChannel.invokeMethod('importTracksFromFile', {
+      'fileUri': fileUri,
+      'centerOnData': centerOnData,
+    });
+  }
+
+  @override
+  Future<void> viewFileInLocus(String fileUri, {String? mimeType}) async {
+    await methodChannel.invokeMethod('viewFileInLocus', {
+      'fileUri': fileUri,
+      if (mimeType != null) 'mimeType': mimeType,
+    });
+  }
+
+  @override
+  Future<void> displayCircles(List<Map<String, dynamic>> circles, {bool centerOnData = false}) async {
+    await methodChannel.invokeMethod('displayCircles', {
+      'circles': circles,
+      'centerOnData': centerOnData,
+    });
+  }
+
+  @override
+  Future<void> removeCirclesByIds(List<int> ids) async {
+    await methodChannel.invokeMethod('removeCirclesByIds', {
+      'ids': ids,
+    });
+  }
+
+  @override
+  Future<void> clearCircles() async {
+    await methodChannel.invokeMethod('clearCircles');
+  }
+
+  @override
+  Future<void> displayPolylines(List<Map<String, dynamic>> polylines, {bool centerOnData = false}) async {
+    await methodChannel.invokeMethod('displayPolylines', {
+      'polylines': polylines,
+      'centerOnData': centerOnData,
+    });
+  }
+
+  @override
+  Future<void> displayPolygons(List<Map<String, dynamic>> polygons, {bool centerOnData = false}) async {
+    await methodChannel.invokeMethod('displayPolygons', {
+      'polygons': polygons,
+      'centerOnData': centerOnData,
+    });
+  }
+
+  @override
+  Future<void> openFieldNotes({bool createLog = false}) async {
+    await methodChannel.invokeMethod('openFieldNotes', {
+      'createLog': createLog,
+    });
+  }
+
+  @override
+  Future<void> logFieldNotes(List<int> ids, {bool createLog = false}) async {
+    await methodChannel.invokeMethod('logFieldNotes', {
+      'ids': ids,
+      'createLog': createLog,
+    });
+  }
+
+  @override
+  Future<void> openPointDetailById(int id) async {
+    await methodChannel.invokeMethod('openPointDetailById', {
+      'id': id,
+    });
+  }
+
+  @override
+  Future<void> startNavigationById(int id) async {
+    await methodChannel.invokeMethod('startNavigationById', {
+      'id': id,
+    });
+  }
+
+  @override
+  Future<void> startGuidingById(int id) async {
+    await methodChannel.invokeMethod('startGuidingById', {
+      'id': id,
+    });
+  }
+
+  @override
+  Future<void> openAddress(String address) async {
+    await methodChannel.invokeMethod('openAddress', {
+      'address': address,
+    });
+  }
+
+  @override
+  Future<void> navigateTo(String name, double latitude, double longitude) async {
+    await methodChannel.invokeMethod('navigateTo', {
+      'name': name,
+      'latitude': latitude,
+      'longitude': longitude,
+    });
+  }
+
+  @override
+  Future<void> addNewWmsMap(String url) async {
+    await methodChannel.invokeMethod('addNewWmsMap', {
+      'url': url,
+    });
+  }
+
+  @override
+  Future<Map<String, dynamic>?> getActiveVersionInfo() async {
+    final result = await methodChannel.invokeMethod<Map<Object?, Object?>>('getActiveVersionInfo');
+    if (result == null) return null;
+    return Map<String, dynamic>.from(result);
+  }
 }

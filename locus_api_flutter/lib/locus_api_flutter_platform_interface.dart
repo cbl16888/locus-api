@@ -133,4 +133,73 @@ abstract class LocusApiFlutterPlatform extends PlatformInterface {
   Future<void> openLocusMap() {
     throw UnimplementedError('openLocusMap() has not been implemented.');
   }
+
+  // Extra APIs exposed by Android plugin
+  Future<void> importPointsFromFile(String fileUri, {bool centerOnData = true}) {
+    throw UnimplementedError('importPointsFromFile() has not been implemented.');
+  }
+
+  Future<void> importTracksFromFile(String fileUri, {bool centerOnData = true}) {
+    throw UnimplementedError('importTracksFromFile() has not been implemented.');
+  }
+
+  Future<void> viewFileInLocus(String fileUri, {String? mimeType}) {
+    throw UnimplementedError('viewFileInLocus() has not been implemented.');
+  }
+
+  Future<void> displayCircles(List<Map<String, dynamic>> circles, {bool centerOnData = false}) {
+    throw UnimplementedError('displayCircles() has not been implemented.');
+  }
+
+  Future<void> removeCirclesByIds(List<int> ids) {
+    throw UnimplementedError('removeCirclesByIds() has not been implemented.');
+  }
+
+  Future<void> clearCircles() {
+    throw UnimplementedError('clearCircles() has not been implemented.');
+  }
+
+  Future<void> displayPolylines(List<Map<String, dynamic>> polylines, {bool centerOnData = false}) {
+    throw UnimplementedError('displayPolylines() has not been implemented.');
+  }
+
+  Future<void> displayPolygons(List<Map<String, dynamic>> polygons, {bool centerOnData = false}) {
+    throw UnimplementedError('displayPolygons() has not been implemented.');
+  }
+
+  Future<void> openFieldNotes({bool createLog = false}) {
+    throw UnimplementedError('openFieldNotes() has not been implemented.');
+  }
+
+  Future<void> logFieldNotes(List<int> ids, {bool createLog = false}) {
+    throw UnimplementedError('logFieldNotes() has not been implemented.');
+  }
+
+  Future<void> openPointDetailById(int id) {
+    throw UnimplementedError('openPointDetailById() has not been implemented.');
+  }
+
+  Future<void> startNavigationById(int id) {
+    throw UnimplementedError('startNavigationById() has not been implemented.');
+  }
+
+  Future<void> startGuidingById(int id) {
+    throw UnimplementedError('startGuidingById() has not been implemented.');
+  }
+
+  Future<void> openAddress(String address) {
+    throw UnimplementedError('openAddress() has not been implemented.');
+  }
+
+  Future<void> navigateTo(String name, double latitude, double longitude) {
+    throw UnimplementedError('navigateTo() has not been implemented.');
+  }
+
+  Future<void> addNewWmsMap(String url) {
+    throw UnimplementedError('addNewWmsMap() has not been implemented.');
+  }
+
+  Future<Map<String, dynamic>?> getActiveVersionInfo() {
+    throw UnimplementedError('getActiveVersionInfo() has not been implemented.');
+  }
 }

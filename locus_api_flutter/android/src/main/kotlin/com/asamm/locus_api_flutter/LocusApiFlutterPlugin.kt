@@ -499,7 +499,7 @@ class LocusApiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
               
               // 发送空的轨迹数据来清除所有轨迹
               val emptyTracks = emptyList<Track>()
-              intent.putExtra(LocusConst.INTENT_EXTRA_TRACKS_MULTI, Storable.getAsBytes(emptyTracks))
+              intent.putExtra(LocusConst.INTENT_EXTRA_TRACKS_MULTI, bytesForTracks(emptyTracks))
               intent.putExtra(LocusConst.INTENT_EXTRA_CENTER_ON_DATA, false)
               
               // 发送广播来清除轨迹
@@ -536,7 +536,7 @@ class LocusApiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
               
               // 发送空的轨迹数据来清除所有轨迹
               val emptyTracks = emptyList<Track>()
-              intent.putExtra(LocusConst.INTENT_EXTRA_TRACKS_MULTI, Storable.getAsBytes(emptyTracks))
+              intent.putExtra(LocusConst.INTENT_EXTRA_TRACKS_MULTI, bytesForTracks(emptyTracks))
               intent.putExtra(LocusConst.INTENT_EXTRA_CENTER_ON_DATA, false)
               
               // 发送广播来清除轨迹
@@ -781,32 +781,26 @@ class LocusApiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           }
         }
 
-        // Display circles on map
+                // Display circles on map
         "displayCircles" -> {
           val circlesArg = call.argument<List<Map<String, Any>>>("circles") ?: emptyList()
           val centerOnData = call.argument<Boolean>("centerOnData") ?: false
           try {
             val lv = LocusUtils.getActiveVersion(context)
             if (lv == null) { result.success(false); return }
-            val circles = circlesArg.map { m ->
-              val lat = (m["latitude"] as? Number)?.toDouble() ?: 0.0
-              val lon = (m["longitude"] as? Number)?.toDouble() ?: 0.0
-              val r = (m["radius"] as? Number)?.toDouble() ?: 0.0
-              val name = m["name"] as? String ?: ""
-              Circle().apply {
+            val circlesPacked = circlesArg.map { map ->
+              val name = map["name"] as? String ?: ""
+              val latitude = (map["latitude"] as? Number)?.toDouble() ?: 0.0
+              val longitude = (map["longitude"] as? Number)?.toDouble() ?: 0.0
+              val radius = (map["radius"] as? Number)?.toDouble() ?: 0.0
+              Circle(Location(latitude, longitude), radius.toFloat(), false).apply {
                 this.name = name
-                // TODO: 设置圆心与半径，需根据所用 Locus API 版本的 Circle 接口：
-                // 可能是 setLocation(Location(...)) / setRadiusMeters(r)
-                // 或者 location = Location(...), radius = r
-                // 请确认 API 定义后再改回正确字段/方法
-                // 示例（待确认）：
-                // setLocation(Location(lat, lon))
-                // setRadiusMeters(r)
               }
             }
+
             val intent = Intent(LocusConst.ACTION_DISPLAY_DATA_SILENTLY).apply {
               setPackage(lv.packageName)
-              putExtra(LocusConst.INTENT_EXTRA_CIRCLES_MULTI, Storable.getAsBytes(circles))
+              putExtra(LocusConst.INTENT_EXTRA_CIRCLES_MULTI, serializeStorable(circlesPacked))
               putExtra(LocusConst.INTENT_EXTRA_CENTER_ON_DATA, centerOnData)
             }
             LocusUtils.sendBroadcast(context, intent, lv)
@@ -821,10 +815,10 @@ class LocusApiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           try {
             val lv = LocusUtils.getActiveVersion(context)
             if (lv == null) { result.success(false); return }
-            // 采用发送空集合的方式做清理（best-effort，与 clearTracks 一致）
+            // 当前未提供基于 ID 的删除 Extra，这里采用清空策略（与 clearTracks 一致）
             val intent = Intent(LocusConst.ACTION_DISPLAY_DATA_SILENTLY).apply {
               setPackage(lv.packageName)
-              putExtra(LocusConst.INTENT_EXTRA_CIRCLES_MULTI, Storable.getAsBytes(emptyList<Circle>()))
+              putExtra(LocusConst.INTENT_EXTRA_CIRCLES_MULTI, serializeStorable(emptyList()))
               putExtra(LocusConst.INTENT_EXTRA_CENTER_ON_DATA, false)
             }
             LocusUtils.sendBroadcast(context, intent, lv)
@@ -873,6 +867,112 @@ class LocusApiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             }
             currentActivity.startActivity(intent)
             result.success(true)
+          } catch (e: Throwable) {
+            result.error("LOCUS_API_ERROR", e.message, null)
+          }
+        }
+
+        // Clear all circles explicitly
+        "clearCircles" -> {
+          try {
+            val lv = LocusUtils.getActiveVersion(context)
+            if (lv == null) { result.success(false); return }
+            val intent = Intent(LocusConst.ACTION_DISPLAY_DATA_SILENTLY).apply {
+              setPackage(lv.packageName)
+              putExtra(LocusConst.INTENT_EXTRA_CIRCLES_MULTI, serializeStorable(emptyList()))
+              putExtra(LocusConst.INTENT_EXTRA_CENTER_ON_DATA, false)
+            }
+            LocusUtils.sendBroadcast(context, intent, lv)
+            result.success(true)
+          } catch (e: Throwable) {
+            result.error("LOCUS_API_ERROR", e.message, null)
+          }
+        }
+
+        // Display polylines (basic via Track)
+        "displayPolylines" -> {
+          val linesArg = call.argument<List<Map<String, Any>>>("polylines") ?: emptyList()
+          val centerOnData = call.argument<Boolean>("centerOnData") ?: false
+          try {
+            val tracks = linesArg.map { line ->
+              val name = line["name"] as? String ?: ""
+              val colorHex = line["color"] as? String
+              val width = (line["width"] as? Number)?.toFloat()
+              val pts = (line["points"] as? List<Map<String, Any>>)?.map { p ->
+                val la = (p["latitude"] as? Number)?.toDouble() ?: 0.0
+                val lo = (p["longitude"] as? Number)?.toDouble() ?: 0.0
+                Location(la, lo)
+              } ?: emptyList()
+              Track().apply {
+                this.name = name
+                if (colorHex != null || width != null) {
+                  val style = GeoDataStyle()
+                  val color = try { if (colorHex != null) Color.parseColor(colorHex) else Color.RED } catch (_: Throwable) { Color.RED }
+                  val w = width ?: 5f
+                  style.setLineStyle(color, w)
+                  this.styleNormal = style
+                }
+                this.points.addAll(pts)
+              }
+            }
+            val act = activity ?: (context as? Activity)
+            if (act == null) {
+              result.success(false)
+              return
+            }
+            val ok = ActionDisplayTracks.sendTracks(
+              act,
+              tracks,
+              if (centerOnData) ActionDisplayVarious.ExtraAction.CENTER else ActionDisplayVarious.ExtraAction.NONE
+            )
+            result.success(ok)
+          } catch (e: Throwable) {
+            result.error("LOCUS_API_ERROR", e.message, null)
+          }
+        }
+
+        // Display polygons (best-effort via closed Track)
+        "displayPolygons" -> {
+          val polysArg = call.argument<List<Map<String, Any>>>("polygons") ?: emptyList()
+          val centerOnData = call.argument<Boolean>("centerOnData") ?: false
+          try {
+            val tracks = polysArg.map { poly ->
+              val name = poly["name"] as? String ?: ""
+              val colorHex = poly["strokeColor"] as? String
+              val width = (poly["strokeWidth"] as? Number)?.toFloat()
+              val pts = (poly["points"] as? List<Map<String, Any>>)?.map { p ->
+                val la = (p["latitude"] as? Number)?.toDouble() ?: 0.0
+                val lo = (p["longitude"] as? Number)?.toDouble() ?: 0.0
+                Location(la, lo)
+              } ?: emptyList()
+              val closed = if (pts.size >= 2) {
+                val first = pts.first()
+                val last = pts.last()
+                if (first.latitude != last.latitude || first.longitude != last.longitude) pts + first else pts
+              } else pts
+              Track().apply {
+                this.name = name
+                if (colorHex != null || width != null) {
+                  val style = GeoDataStyle()
+                  val color = try { if (colorHex != null) Color.parseColor(colorHex) else Color.RED } catch (_: Throwable) { Color.RED }
+                  val w = width ?: 5f
+                  style.setLineStyle(color, w)
+                  this.styleNormal = style
+                }
+                this.points.addAll(closed)
+              }
+            }
+            val act = activity ?: (context as? Activity)
+            if (act == null) {
+              result.success(false)
+              return
+            }
+            val ok = ActionDisplayTracks.sendTracks(
+              act,
+              tracks,
+              if (centerOnData) ActionDisplayVarious.ExtraAction.CENTER else ActionDisplayVarious.ExtraAction.NONE
+            )
+            result.success(ok)
           } catch (e: Throwable) {
             result.error("LOCUS_API_ERROR", e.message, null)
           }
@@ -991,6 +1091,32 @@ class LocusApiFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     }
     
     return track
+  }
+
+  private fun bytesForCircles(data: List<Map<String, Any>>): ByteArray? {
+    val circles: List<Circle> = data.map { richMap ->
+      val name = richMap["name"] as? String ?: ""
+      val latitude = (richMap["latitude"] as? Number)?.toDouble() ?: 0.0
+      val longitude = (richMap["longitude"] as? Number)?.toDouble() ?: 0.0
+      val radius = (richMap["radius"] as? Number)?.toDouble() ?: 0.0
+      Circle(Location(latitude, longitude), radius.toFloat(), false).apply {
+        this.name = name
+      }
+    }
+    return serializeStorable(circles)
+  }
+
+  private fun bytesForTracks(tracks: List<Track>): ByteArray? {
+    return serializeStorable(tracks)
+  }
+
+  private fun serializeStorable(items: List<out Storable>): ByteArray? {
+    return try {
+      @Suppress("UNCHECKED_CAST")
+      Storable.getAsBytes(items as List<Storable>)
+    } catch (_: Throwable) {
+      null
+    }
   }
 
   override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {

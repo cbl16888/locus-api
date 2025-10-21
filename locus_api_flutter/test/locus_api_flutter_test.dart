@@ -79,6 +79,108 @@ class MockLocusApiFlutterPlatform
 
   @override
   Future<void> openLocusMap() => Future.value();
+
+  @override
+  Future<void> addNewWmsMap(String url) {
+    // TODO: implement addNewWmsMap
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> clearCircles() {
+    // TODO: implement clearCircles
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> displayCircles(List<Map<String, dynamic>> circles, {bool centerOnData = false}) {
+    // TODO: implement displayCircles
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> displayPolygons(List<Map<String, dynamic>> polygons, {bool centerOnData = false}) {
+    // TODO: implement displayPolygons
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> displayPolylines(List<Map<String, dynamic>> polylines, {bool centerOnData = false}) {
+    // TODO: implement displayPolylines
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Map<String, dynamic>?> getActiveVersionInfo() {
+    // TODO: implement getActiveVersionInfo
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> importPointsFromFile(String fileUri, {bool centerOnData = true}) {
+    // TODO: implement importPointsFromFile
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> importTracksFromFile(String fileUri, {bool centerOnData = true}) {
+    // TODO: implement importTracksFromFile
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> logFieldNotes(List<int> ids, {bool createLog = false}) {
+    // TODO: implement logFieldNotes
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> navigateTo(String name, double latitude, double longitude) {
+    // TODO: implement navigateTo
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> openAddress(String address) {
+    // TODO: implement openAddress
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> openFieldNotes({bool createLog = false}) {
+    // TODO: implement openFieldNotes
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> openPointDetailById(int id) {
+    // TODO: implement openPointDetailById
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> removeCirclesByIds(List<int> ids) {
+    // TODO: implement removeCirclesByIds
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> startGuidingById(int id) {
+    // TODO: implement startGuidingById
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> startNavigationById(int id) {
+    // TODO: implement startNavigationById
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> viewFileInLocus(String fileUri, {String? mimeType}) {
+    // TODO: implement viewFileInLocus
+    throw UnimplementedError();
+  }
 }
 
 void main() {

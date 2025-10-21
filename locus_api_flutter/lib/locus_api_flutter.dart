@@ -117,4 +117,73 @@ class LocusApiFlutter {
   Future<void> openLocusMap() {
     return LocusApiFlutterPlatform.instance.openLocusMap();
   }
+
+  // Extra APIs
+  Future<void> importPointsFromFile(String fileUri, {bool centerOnData = true}) {
+    return LocusApiFlutterPlatform.instance.importPointsFromFile(fileUri, centerOnData: centerOnData);
+  }
+
+  Future<void> importTracksFromFile(String fileUri, {bool centerOnData = true}) {
+    return LocusApiFlutterPlatform.instance.importTracksFromFile(fileUri, centerOnData: centerOnData);
+  }
+
+  Future<void> viewFileInLocus(String fileUri, {String? mimeType}) {
+    return LocusApiFlutterPlatform.instance.viewFileInLocus(fileUri, mimeType: mimeType);
+  }
+
+  Future<void> displayCircles(List<Map<String, dynamic>> circles, {bool centerOnData = false}) {
+    return LocusApiFlutterPlatform.instance.displayCircles(circles, centerOnData: centerOnData);
+  }
+
+  Future<void> removeCirclesByIds(List<int> ids) {
+    return LocusApiFlutterPlatform.instance.removeCirclesByIds(ids);
+  }
+
+  Future<void> clearCircles() {
+    return LocusApiFlutterPlatform.instance.clearCircles();
+  }
+
+  Future<void> displayPolylines(List<Map<String, dynamic>> polylines, {bool centerOnData = false}) {
+    return LocusApiFlutterPlatform.instance.displayPolylines(polylines, centerOnData: centerOnData);
+  }
+
+  Future<void> displayPolygons(List<Map<String, dynamic>> polygons, {bool centerOnData = false}) {
+    return LocusApiFlutterPlatform.instance.displayPolygons(polygons, centerOnData: centerOnData);
+  }
+
+  Future<void> openFieldNotes({bool createLog = false}) {
+    return LocusApiFlutterPlatform.instance.openFieldNotes(createLog: createLog);
+  }
+
+  Future<void> logFieldNotes(List<int> ids, {bool createLog = false}) {
+    return LocusApiFlutterPlatform.instance.logFieldNotes(ids, createLog: createLog);
+  }
+
+  Future<void> openPointDetailById(int id) {
+    return LocusApiFlutterPlatform.instance.openPointDetailById(id);
+  }
+
+  Future<void> startNavigationById(int id) {
+    return LocusApiFlutterPlatform.instance.startNavigationById(id);
+  }
+
+  Future<void> startGuidingById(int id) {
+    return LocusApiFlutterPlatform.instance.startGuidingById(id);
+  }
+
+  Future<void> openAddress(String address) {
+    return LocusApiFlutterPlatform.instance.openAddress(address);
+  }
+
+  Future<void> navigateTo(String name, double latitude, double longitude) {
+    return LocusApiFlutterPlatform.instance.navigateTo(name, latitude, longitude);
+  }
+
+  Future<void> addNewWmsMap(String url) {
+    return LocusApiFlutterPlatform.instance.addNewWmsMap(url);
+  }
+
+  Future<Map<String, dynamic>?> getActiveVersionInfo() {
+    return LocusApiFlutterPlatform.instance.getActiveVersionInfo();
+  }
 }
